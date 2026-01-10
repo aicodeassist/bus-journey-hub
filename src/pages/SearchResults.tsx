@@ -102,7 +102,8 @@ const SearchResults = () => {
   const from = searchParams.get("from") || "";
   const to = searchParams.get("to") || "";
   const date = searchParams.get("date") || "";
-  const passengers = parseInt(searchParams.get("passengers") || "1");
+  const adults = parseInt(searchParams.get("adults") || "1");
+  const children = parseInt(searchParams.get("children") || "0");
 
   const formattedDate = date ? new Date(date).toLocaleDateString("uk-UA", {
     weekday: "long",
@@ -133,7 +134,7 @@ const SearchResults = () => {
         <div className="container mx-auto px-4">
           <SearchForm 
             variant="compact" 
-            initialData={{ from, to, departureDate: date, passengers }}
+            initialData={{ from, to, departureDate: date, adults, children }}
           />
         </div>
       </section>
@@ -148,7 +149,7 @@ const SearchResults = () => {
                 {from} → {to}
               </h1>
               <p className="text-muted-foreground mt-1">
-                {formattedDate} • {passengers} {passengers === 1 ? "пасажир" : passengers < 5 ? "пасажири" : "пасажирів"}
+                {formattedDate} • {adults + children} {(adults + children) === 1 ? "пасажир" : (adults + children) < 5 ? "пасажири" : "пасажирів"}
               </p>
             </div>
             
