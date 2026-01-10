@@ -1,7 +1,9 @@
-import { MapPin, Calendar, Users, ArrowRightLeft, Search } from "lucide-react";
+import { MapPin, Calendar, ArrowRightLeft, Search } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DatePicker from "./DatePicker";
+import PassengerPicker from "./PassengerPicker";
+
 interface SearchFormProps {
   variant?: "hero" | "compact";
   initialData?: {
@@ -9,7 +11,8 @@ interface SearchFormProps {
     to?: string;
     departureDate?: string;
     returnDate?: string;
-    passengers?: number;
+    adults?: number;
+    children?: number;
   };
 }
 
@@ -25,7 +28,8 @@ const SearchForm = ({ variant = "hero", initialData }: SearchFormProps) => {
     to: initialData?.to || "",
     departureDate: initialData?.departureDate || "",
     returnDate: initialData?.returnDate || "",
-    passengers: initialData?.passengers || 1,
+    adults: initialData?.adults || 1,
+    children: initialData?.children || 0,
   });
   const [showFromSuggestions, setShowFromSuggestions] = useState(false);
   const [showToSuggestions, setShowToSuggestions] = useState(false);
@@ -40,12 +44,15 @@ const SearchForm = ({ variant = "hero", initialData }: SearchFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const totalPassengers = formData.adults + formData.children;
     const params = new URLSearchParams({
       from: formData.from,
       to: formData.to,
       date: formData.departureDate,
       returnDate: formData.returnDate,
-      passengers: formData.passengers.toString(),
+      passengers: totalPassengers.toString(),
+      adults: formData.adults.toString(),
+      children: formData.children.toString(),
     });
     navigate(`/search?${params.toString()}`);
   };
@@ -203,20 +210,12 @@ const SearchForm = ({ variant = "hero", initialData }: SearchFormProps) => {
           <label className="block text-sm font-medium text-muted-foreground mb-2">
             Пасажири
           </label>
-          <div className="relative">
-            <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent" />
-            <select
-              value={formData.passengers}
-              onChange={(e) => setFormData(prev => ({ ...prev, passengers: parseInt(e.target.value) }))}
-              className="search-input pl-12 appearance-none cursor-pointer"
-            >
-              {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
-                <option key={num} value={num}>
-                  {num} {num === 1 ? "пасажир" : num < 5 ? "пасажири" : "пасажирів"}
-                </option>
-              ))}
-            </select>
-          </div>
+          <PassengerPicker
+            adults={formData.adults}
+            children={formData.children}
+            onChangeAdults={(count) => setFormData(prev => ({ ...prev, adults: count }))}
+            onChangeChildren={(count) => setFormData(prev => ({ ...prev, children: count }))}
+          />
         </div>
 
         {/* Search Button */}
