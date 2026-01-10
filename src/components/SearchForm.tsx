@@ -1,7 +1,7 @@
 import { MapPin, Calendar, Users, ArrowRightLeft, Search } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import DatePicker from "./DatePicker";
 interface SearchFormProps {
   variant?: "hero" | "compact";
   initialData?: {
@@ -165,37 +165,35 @@ const SearchForm = ({ variant = "hero", initialData }: SearchFormProps) => {
           <label className="block text-sm font-medium text-muted-foreground mb-2">
             Дати поїздки
           </label>
-          <div className="relative flex items-center bg-secondary rounded-xl border-2 border-transparent focus-within:border-accent transition-colors overflow-hidden">
-            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent z-10" />
+          <div className="relative flex items-center bg-secondary rounded-xl border-2 border-transparent focus-within:border-accent transition-colors">
+            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent z-10 pointer-events-none" />
             
             {/* Departure Date */}
-            <div className="relative flex-1 group">
-              <input
-                type="date"
-                value={formData.departureDate}
-                onChange={(e) => setFormData(prev => ({ ...prev, departureDate: e.target.value }))}
-                className="w-full py-4 pl-12 pr-2 bg-transparent text-foreground focus:outline-none cursor-pointer"
-                required
-              />
-              <span className={`absolute left-12 top-1 text-[10px] font-medium text-muted-foreground pointer-events-none transition-opacity ${formData.departureDate ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="relative flex-1 pl-10">
+              <span className="absolute left-10 top-1 text-[10px] font-medium text-muted-foreground pointer-events-none">
                 Туди
               </span>
+              <DatePicker
+                value={formData.departureDate}
+                onChange={(date) => setFormData(prev => ({ ...prev, departureDate: date }))}
+                placeholder="Виберіть"
+              />
             </div>
             
             {/* Divider */}
-            <div className="w-px h-8 bg-border" />
+            <div className="w-px h-10 bg-border flex-shrink-0" />
             
             {/* Return Date */}
-            <div className="relative flex-1 group">
-              <input
-                type="date"
-                value={formData.returnDate}
-                onChange={(e) => setFormData(prev => ({ ...prev, returnDate: e.target.value }))}
-                className="w-full py-4 px-4 bg-transparent text-foreground focus:outline-none cursor-pointer"
-              />
-              <span className={`absolute left-4 top-1 text-[10px] font-medium text-muted-foreground pointer-events-none transition-opacity ${formData.returnDate ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-1 text-[10px] font-medium text-muted-foreground pointer-events-none">
                 Назад
               </span>
+              <DatePicker
+                value={formData.returnDate}
+                onChange={(date) => setFormData(prev => ({ ...prev, returnDate: date }))}
+                placeholder="+ Додати"
+                minDate={formData.departureDate}
+              />
             </div>
           </div>
         </div>
