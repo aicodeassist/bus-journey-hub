@@ -146,15 +146,15 @@ const PassengerPicker = ({ adults, children, onChangeAdults, onChangeChildren }:
   );
 
   return (
-    <div ref={containerRef} className="relative">
-      <div className="relative">
-        <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent" />
+    <div ref={containerRef} className="relative h-full">
+      <div className="relative h-full">
+        <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent z-10" />
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full search-input pl-12 text-left cursor-pointer flex items-center"
+          className="w-full h-full px-4 pl-12 rounded-xl border-2 border-transparent bg-secondary/50 text-foreground text-left cursor-pointer flex items-center hover:bg-secondary focus:outline-none focus:border-accent focus:bg-card transition-all duration-300"
         >
-          <span className="truncate">
+          <span className="truncate text-sm">
             {totalPassengers} {totalPassengers === 1 ? "пасажир" : totalPassengers < 5 ? "пасажири" : "пасажирів"}
           </span>
         </button>

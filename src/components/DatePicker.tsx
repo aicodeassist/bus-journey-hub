@@ -206,16 +206,16 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
   );
 
   return (
-    <div ref={containerRef} className="relative flex-1">
+    <div ref={containerRef} className="relative">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-full py-4 px-3 text-left bg-transparent text-foreground focus:outline-none cursor-pointer"
+        className="w-full text-left bg-transparent text-foreground focus:outline-none cursor-pointer py-0.5"
       >
         {value ? (
-          <span className="font-medium">{formatDisplayDate(value)}</span>
+          <span className="font-medium text-sm">{formatDisplayDate(value)}</span>
         ) : (
-          <span className="text-muted-foreground">{placeholder}</span>
+          <span className="text-muted-foreground text-sm">{placeholder}</span>
         )}
       </button>
 
