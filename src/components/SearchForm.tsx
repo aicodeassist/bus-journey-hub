@@ -73,26 +73,28 @@ const SearchForm = ({ variant = "hero", initialData }: SearchFormProps) => {
       className={`
         ${isHero 
           ? "bg-card rounded-3xl shadow-search p-6 md:p-8" 
-          : "bg-card rounded-2xl shadow-card p-4 md:p-6"
+          : "bg-card rounded-2xl shadow-card p-4"
         }
       `}
     >
-      <div className={`grid gap-4 ${isHero ? "md:grid-cols-2 lg:grid-cols-5" : "md:grid-cols-6"}`}>
+      <div className={`flex flex-col ${isHero ? "lg:flex-row" : "md:flex-row"} gap-3 items-stretch`}>
         {/* From Field */}
-        <div className={`relative ${isHero ? "lg:col-span-1" : "md:col-span-1"}`}>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
-            Звідки
-          </label>
-          <div className="relative">
-            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent" />
+        <div className={`relative ${isHero ? "lg:flex-1" : "md:flex-1"}`}>
+          {isHero && (
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Звідки
+            </label>
+          )}
+          <div className="relative h-[52px]">
+            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent z-10" />
             <input
               type="text"
-              placeholder="Місто відправлення"
+              placeholder={isHero ? "Місто відправлення" : "Звідки"}
               value={formData.from}
               onChange={(e) => setFormData(prev => ({ ...prev, from: e.target.value }))}
               onFocus={() => setShowFromSuggestions(true)}
               onBlur={() => setTimeout(() => setShowFromSuggestions(false), 200)}
-              className="search-input pl-12"
+              className="w-full h-full px-4 pl-12 rounded-xl border-2 border-transparent bg-secondary/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent focus:bg-card transition-all duration-300 hover:bg-secondary"
               required
             />
             {showFromSuggestions && formData.from && filteredFromCities.length > 0 && (
@@ -116,34 +118,34 @@ const SearchForm = ({ variant = "hero", initialData }: SearchFormProps) => {
           </div>
         </div>
 
-        {/* Swap Button - Only visible on larger screens between from/to */}
-        {isHero && (
-          <div className="hidden lg:flex items-end justify-center pb-2">
-            <button
-              type="button"
-              onClick={handleSwapCities}
-              className="p-3 rounded-full bg-secondary hover:bg-accent hover:text-accent-foreground transition-all duration-300 group"
-            >
-              <ArrowRightLeft className="w-5 h-5 transition-transform group-hover:rotate-180 duration-300" />
-            </button>
-          </div>
-        )}
+        {/* Swap Button */}
+        <div className={`flex items-center justify-center ${isHero ? "lg:items-end lg:pb-1" : "md:items-center"}`}>
+          <button
+            type="button"
+            onClick={handleSwapCities}
+            className={`p-2.5 rounded-full bg-secondary hover:bg-accent hover:text-accent-foreground transition-all duration-300 group ${isHero ? "mt-0" : ""}`}
+          >
+            <ArrowRightLeft className="w-4 h-4 transition-transform group-hover:rotate-180 duration-300" />
+          </button>
+        </div>
 
         {/* To Field */}
-        <div className={`relative ${isHero ? "lg:col-span-1" : "md:col-span-1"}`}>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
-            Куди
-          </label>
-          <div className="relative">
-            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent" />
+        <div className={`relative ${isHero ? "lg:flex-1" : "md:flex-1"}`}>
+          {isHero && (
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Куди
+            </label>
+          )}
+          <div className="relative h-[52px]">
+            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent z-10" />
             <input
               type="text"
-              placeholder="Місто прибуття"
+              placeholder={isHero ? "Місто прибуття" : "Куди"}
               value={formData.to}
               onChange={(e) => setFormData(prev => ({ ...prev, to: e.target.value }))}
               onFocus={() => setShowToSuggestions(true)}
               onBlur={() => setTimeout(() => setShowToSuggestions(false), 200)}
-              className="search-input pl-12"
+              className="w-full h-full px-4 pl-12 rounded-xl border-2 border-transparent bg-secondary/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent focus:bg-card transition-all duration-300 hover:bg-secondary"
               required
             />
             {showToSuggestions && formData.to && filteredToCities.length > 0 && (
@@ -168,16 +170,18 @@ const SearchForm = ({ variant = "hero", initialData }: SearchFormProps) => {
         </div>
 
         {/* Combined Date Fields */}
-        <div className={isHero ? "lg:col-span-1" : "md:col-span-2"}>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
-            Дати поїздки
-          </label>
-          <div className="relative flex items-center bg-secondary rounded-xl border-2 border-transparent focus-within:border-accent transition-colors">
+        <div className={isHero ? "lg:flex-1" : "md:flex-1"}>
+          {isHero && (
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Дати
+            </label>
+          )}
+          <div className="relative flex items-center h-[52px] bg-secondary/50 rounded-xl border-2 border-transparent hover:bg-secondary focus-within:border-accent focus-within:bg-card transition-all duration-300">
             <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent z-10 pointer-events-none" />
             
             {/* Departure Date */}
-            <div className="relative flex-1 pl-10">
-              <span className="absolute left-10 top-1 text-[10px] font-medium text-muted-foreground pointer-events-none">
+            <div className="relative flex-1 h-full flex flex-col justify-center pl-12 pr-2">
+              <span className="text-[10px] font-medium text-muted-foreground leading-none">
                 Туди
               </span>
               <DatePicker
@@ -188,11 +192,11 @@ const SearchForm = ({ variant = "hero", initialData }: SearchFormProps) => {
             </div>
             
             {/* Divider */}
-            <div className="w-px h-10 bg-border flex-shrink-0" />
+            <div className="w-px h-8 bg-border flex-shrink-0" />
             
             {/* Return Date */}
-            <div className="relative flex-1">
-              <span className="absolute left-3 top-1 text-[10px] font-medium text-muted-foreground pointer-events-none">
+            <div className="relative flex-1 h-full flex flex-col justify-center pl-3 pr-2">
+              <span className="text-[10px] font-medium text-muted-foreground leading-none">
                 Назад
               </span>
               <DatePicker
@@ -206,29 +210,30 @@ const SearchForm = ({ variant = "hero", initialData }: SearchFormProps) => {
         </div>
 
         {/* Passengers */}
-        <div className={isHero ? "" : "md:col-span-1"}>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
-            Пасажири
-          </label>
-          <PassengerPicker
-            adults={formData.adults}
-            children={formData.children}
-            onChangeAdults={(count) => setFormData(prev => ({ ...prev, adults: count }))}
-            onChangeChildren={(count) => setFormData(prev => ({ ...prev, children: count }))}
-          />
+        <div className={isHero ? "lg:w-48" : "md:w-40"}>
+          {isHero && (
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Пасажири
+            </label>
+          )}
+          <div className="h-[52px]">
+            <PassengerPicker
+              adults={formData.adults}
+              children={formData.children}
+              onChangeAdults={(count) => setFormData(prev => ({ ...prev, adults: count }))}
+              onChangeChildren={(count) => setFormData(prev => ({ ...prev, children: count }))}
+            />
+          </div>
         </div>
 
         {/* Search Button */}
-        <div className={`${isHero ? "md:col-span-2 lg:col-span-5" : "md:col-span-1"} flex items-end`}>
+        <div className={`${isHero ? "lg:w-auto" : "md:w-auto"} flex items-end`}>
           <button
             type="submit"
-            className={`
-              btn-primary w-full flex items-center justify-center gap-3 
-              ${isHero ? "py-4 text-lg" : "py-3"}
-            `}
+            className="btn-primary h-[52px] px-6 flex items-center justify-center gap-2 whitespace-nowrap"
           >
             <Search className="w-5 h-5" />
-            <span>Знайти квитки</span>
+            <span>{isHero ? "Знайти квитки" : "Знайти"}</span>
           </button>
         </div>
       </div>
