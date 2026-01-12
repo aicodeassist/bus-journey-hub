@@ -72,7 +72,7 @@ const Index = () => {
           
           {/* Search Form */}
           <div className="max-w-5xl mx-auto animate-slide-up-delay-2">
-            <SearchForm variant="hero" />
+            <SearchForm variant="compact" />
           </div>
           
           {/* Stats */}
