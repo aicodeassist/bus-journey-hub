@@ -140,7 +140,6 @@ const CityPicker = ({ value, onChange, placeholder = "Виберіть міст�
                       placeholder="Пошук міста..."
                       value={searchQuery}
                       onChange={handleInputChange}
-                      autoFocus
                       className="w-full h-12 px-4 pl-12 rounded-xl border border-border bg-secondary/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent focus:bg-card transition-all"
                     />
                   </div>
