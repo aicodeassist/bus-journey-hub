@@ -15,6 +15,7 @@ interface RouteCardProps {
   amenities: string[];
   busType: string;
   onSelect?: () => void;
+  isSelected?: boolean;
 }
 
 const amenityIcons: Record<string, { icon: React.ReactNode; label: string }> = {
@@ -37,11 +38,12 @@ const RouteCard = ({
   amenities,
   busType,
   onSelect,
+  isSelected = false,
 }: RouteCardProps) => {
   const [showDetails, setShowDetails] = useState(false);
 
   return (
-    <div className="route-card">
+    <div className={`route-card ${isSelected ? "ring-2 ring-accent bg-accent/5" : ""}`}>
       <div className="flex flex-col lg:flex-row lg:items-center gap-6">
         {/* Carrier Info */}
         <div className="flex items-center gap-4 lg:w-48">
@@ -125,9 +127,13 @@ const RouteCard = ({
             </span>
             <button 
               onClick={onSelect}
-              className="btn-primary px-6 py-3 text-sm"
+              className={`px-6 py-3 text-sm rounded-xl font-medium transition-all ${
+                isSelected 
+                  ? "bg-accent text-accent-foreground" 
+                  : "btn-primary"
+              }`}
             >
-              Обрати
+              {isSelected ? "Обрано ✓" : "Обрати"}
             </button>
           </div>
         </div>

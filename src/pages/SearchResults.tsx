@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import SearchForm from "@/components/SearchForm";
 import RouteCard from "@/components/RouteCard";
 import Footer from "@/components/Footer";
-import { Filter, SortAsc, ChevronDown, X } from "lucide-react";
+import { Filter, SortAsc, ChevronDown, X, ArrowRight, ArrowLeft } from "lucide-react";
 import { useState, useMemo } from "react";
 
 // Mock data for search results
@@ -94,6 +94,66 @@ const mockRoutes = [
   },
 ];
 
+// Mock data for return routes
+const mockReturnRoutes = [
+  {
+    id: "r1",
+    carrier: "Автолюкс",
+    carrierRating: 4.8,
+    departureTime: "07:00",
+    arrivalTime: "13:15",
+    departureCity: "Львів",
+    arrivalCity: "Київ",
+    duration: "6г 15хв",
+    price: 450,
+    seatsAvailable: 15,
+    amenities: ["wifi", "ac", "power"],
+    busType: "Комфорт",
+  },
+  {
+    id: "r2",
+    carrier: "Gunsel",
+    carrierRating: 4.9,
+    departureTime: "09:30",
+    arrivalTime: "15:00",
+    departureCity: "Львів",
+    arrivalCity: "Київ",
+    duration: "5г 30хв",
+    price: 520,
+    seatsAvailable: 6,
+    amenities: ["wifi", "ac", "power", "wc"],
+    busType: "VIP",
+  },
+  {
+    id: "r3",
+    carrier: "УкрБус",
+    carrierRating: 4.5,
+    departureTime: "11:00",
+    arrivalTime: "17:45",
+    departureCity: "Львів",
+    arrivalCity: "Київ",
+    duration: "6г 45хв",
+    price: 380,
+    seatsAvailable: 20,
+    amenities: ["ac"],
+    busType: "Стандарт",
+  },
+  {
+    id: "r4",
+    carrier: "EuroClub",
+    carrierRating: 4.7,
+    departureTime: "15:00",
+    arrivalTime: "20:45",
+    departureCity: "Львів",
+    arrivalCity: "Київ",
+    duration: "5г 45хв",
+    price: 490,
+    seatsAvailable: 10,
+    amenities: ["wifi", "ac", "wc"],
+    busType: "Комфорт",
+  },
+];
+
 interface Filters {
   timeSlots: string[];
   priceMin: string;
@@ -124,6 +184,9 @@ const SearchResults = () => {
   const [sortBy, setSortBy] = useState<"price" | "time" | "duration">("price");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [activeTab, setActiveTab] = useState<"outbound" | "return">("outbound");
+  const [selectedOutbound, setSelectedOutbound] = useState<string | null>(null);
+  const [selectedReturn, setSelectedReturn] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({
     timeSlots: [],
     priceMin: "",
@@ -138,6 +201,17 @@ const SearchResults = () => {
   const returnDate = searchParams.get("returnDate") || "";
   const adults = parseInt(searchParams.get("adults") || "1");
   const children = parseInt(searchParams.get("children") || "0");
+  
+  const hasReturnDate = !!returnDate;
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleDateString("uk-UA", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    });
+  };
 
   const formattedDate = date ? new Date(date).toLocaleDateString("uk-UA", {
     weekday: "long",
@@ -146,22 +220,47 @@ const SearchResults = () => {
     day: "numeric",
   }) : "";
 
-  const handleSelectRoute = (routeId: string) => {
-    const params = new URLSearchParams({
-      routeId,
-      from,
-      to,
-      date,
-      returnDate,
-      adults: adults.toString(),
-      children: children.toString(),
-    });
-    navigate(`/booking?${params.toString()}`);
+  const handleSelectRoute = (routeId: string, type: "outbound" | "return") => {
+    if (type === "outbound") {
+      setSelectedOutbound(routeId);
+      if (hasReturnDate) {
+        setActiveTab("return");
+      } else {
+        // Navigate to booking for one-way trip
+        const params = new URLSearchParams({
+          routeId,
+          from,
+          to,
+          date,
+          adults: adults.toString(),
+          children: children.toString(),
+        });
+        navigate(`/booking?${params.toString()}`);
+      }
+    } else {
+      setSelectedReturn(routeId);
+    }
+  };
+
+  const handleConfirmBooking = () => {
+    if (selectedOutbound && (selectedReturn || !hasReturnDate)) {
+      const params = new URLSearchParams({
+        outboundId: selectedOutbound,
+        returnId: selectedReturn || "",
+        from,
+        to,
+        date,
+        returnDate,
+        adults: adults.toString(),
+        children: children.toString(),
+      });
+      navigate(`/booking?${params.toString()}`);
+    }
   };
 
   // Filter logic
-  const filteredRoutes = useMemo(() => {
-    return mockRoutes.filter(route => {
+  const applyFilters = (routes: typeof mockRoutes) => {
+    return routes.filter(route => {
       // Time slot filter
       if (filters.timeSlots.length > 0) {
         const hour = parseInt(route.departureTime.split(":")[0]);
@@ -194,11 +293,11 @@ const SearchResults = () => {
 
       return true;
     });
-  }, [filters]);
+  };
 
   // Sort logic
-  const sortedRoutes = useMemo(() => {
-    return [...filteredRoutes].sort((a, b) => {
+  const applySort = (routes: typeof mockRoutes) => {
+    return [...routes].sort((a, b) => {
       if (sortBy === "price") return a.price - b.price;
       if (sortBy === "time") return a.departureTime.localeCompare(b.departureTime);
       if (sortBy === "duration") {
@@ -210,7 +309,12 @@ const SearchResults = () => {
       }
       return 0;
     });
-  }, [filteredRoutes, sortBy]);
+  };
+
+  const sortedOutboundRoutes = useMemo(() => applySort(applyFilters(mockRoutes)), [filters, sortBy]);
+  const sortedReturnRoutes = useMemo(() => applySort(applyFilters(mockReturnRoutes)), [filters, sortBy]);
+
+  const currentRoutes = activeTab === "outbound" ? sortedOutboundRoutes : sortedReturnRoutes;
 
   const toggleFilter = (category: keyof Pick<Filters, 'timeSlots' | 'carriers' | 'amenities'>, value: string) => {
     setFilters(prev => ({
@@ -237,6 +341,9 @@ const SearchResults = () => {
     (filters.priceMin ? 1 : 0) + 
     (filters.priceMax ? 1 : 0);
 
+  const selectedOutboundRoute = mockRoutes.find(r => r.id === selectedOutbound);
+  const selectedReturnRoute = mockReturnRoutes.find(r => r.id === selectedReturn);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -262,8 +369,8 @@ const SearchResults = () => {
               </h1>
               <p className="text-muted-foreground mt-1">
                 {formattedDate} • {adults + children} {(adults + children) === 1 ? "пасажир" : (adults + children) < 5 ? "пасажири" : "пасажирів"}
-                {returnDate && (
-                  <span className="ml-2 text-accent">• Зворотній квиток</span>
+                {hasReturnDate && (
+                  <span className="ml-2 text-accent">• Туди-назад</span>
                 )}
               </p>
             </div>
@@ -327,6 +434,62 @@ const SearchResults = () => {
               </div>
             </div>
           </div>
+
+          {/* Round Trip Tabs */}
+          {hasReturnDate && (
+            <div className="flex gap-2 mb-6">
+              <button
+                onClick={() => setActiveTab("outbound")}
+                className={`flex-1 md:flex-none flex items-center justify-center gap-3 px-6 py-4 rounded-xl border-2 transition-all ${
+                  activeTab === "outbound"
+                    ? "border-accent bg-accent/10 text-foreground"
+                    : "border-border bg-card hover:border-accent/50"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <ArrowRight className="w-5 h-5 text-accent" />
+                  <div className="text-left">
+                    <p className="text-sm text-muted-foreground">Туди</p>
+                    <p className="font-semibold">{from} → {to}</p>
+                    <p className="text-sm text-muted-foreground">{formatDate(date)}</p>
+                  </div>
+                </div>
+                {selectedOutbound && (
+                  <div className="ml-4 pl-4 border-l border-border text-left">
+                    <p className="text-sm text-muted-foreground">Обрано</p>
+                    <p className="font-semibold text-accent">{selectedOutboundRoute?.departureTime}</p>
+                    <p className="text-sm">{selectedOutboundRoute?.price} ₴</p>
+                  </div>
+                )}
+              </button>
+              
+              <button
+                onClick={() => setActiveTab("return")}
+                className={`flex-1 md:flex-none flex items-center justify-center gap-3 px-6 py-4 rounded-xl border-2 transition-all ${
+                  activeTab === "return"
+                    ? "border-accent bg-accent/10 text-foreground"
+                    : "border-border bg-card hover:border-accent/50"
+                } ${!selectedOutbound && "opacity-50 cursor-not-allowed"}`}
+                disabled={!selectedOutbound}
+              >
+                <div className="flex items-center gap-2">
+                  <ArrowLeft className="w-5 h-5 text-accent" />
+                  <div className="text-left">
+                    <p className="text-sm text-muted-foreground">Назад</p>
+                    <p className="font-semibold">{to} → {from}</p>
+                    <p className="text-sm text-muted-foreground">{formatDate(returnDate)}</p>
+                  </div>
+                </div>
+                {selectedReturn && (
+                  <div className="ml-4 pl-4 border-l border-border text-left">
+                    <p className="text-sm text-muted-foreground">Обрано</p>
+                    <p className="font-semibold text-accent">{selectedReturnRoute?.departureTime}</p>
+                    <p className="text-sm">{selectedReturnRoute?.price} ₴</p>
+                  </div>
+                )}
+              </button>
+            </div>
+          )}
 
           {/* Filters Panel */}
           {showFilters && (
@@ -432,22 +595,27 @@ const SearchResults = () => {
 
           {/* Results Count */}
           <p className="text-muted-foreground mb-6">
-            Знайдено <span className="font-semibold text-foreground">{sortedRoutes.length}</span> рейсів
+            Знайдено <span className="font-semibold text-foreground">{currentRoutes.length}</span> рейсів
+            {activeTab === "outbound" ? ` ${from} → ${to}` : ` ${to} → ${from}`}
           </p>
 
           {/* Route Cards */}
           <div className="space-y-4">
-            {sortedRoutes.map((route, index) => (
+            {currentRoutes.map((route, index) => (
               <div 
                 key={route.id} 
                 className="animate-slide-up"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <RouteCard {...route} onSelect={() => handleSelectRoute(route.id)} />
+                <RouteCard 
+                  {...route} 
+                  onSelect={() => handleSelectRoute(route.id, activeTab)}
+                  isSelected={activeTab === "outbound" ? selectedOutbound === route.id : selectedReturn === route.id}
+                />
               </div>
             ))}
 
-            {sortedRoutes.length === 0 && (
+            {currentRoutes.length === 0 && (
               <div className="text-center py-16">
                 <p className="text-xl text-muted-foreground mb-4">Рейсів не знайдено</p>
                 <p className="text-muted-foreground mb-6">Спробуйте змінити параметри пошуку або фільтри</p>
@@ -460,6 +628,44 @@ const SearchResults = () => {
               </div>
             )}
           </div>
+
+          {/* Sticky Booking Bar for Round Trip */}
+          {hasReturnDate && selectedOutbound && selectedReturn && (
+            <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg p-4 z-40 animate-slide-up">
+              <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+                  <div className="flex items-center gap-3">
+                    <ArrowRight className="w-5 h-5 text-accent" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Туди</p>
+                      <p className="font-semibold">{selectedOutboundRoute?.departureTime} • {selectedOutboundRoute?.price} ₴</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <ArrowLeft className="w-5 h-5 text-accent" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Назад</p>
+                      <p className="font-semibold">{selectedReturnRoute?.departureTime} • {selectedReturnRoute?.price} ₴</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Загалом</p>
+                    <p className="text-2xl font-bold text-accent">
+                      {(selectedOutboundRoute?.price || 0) + (selectedReturnRoute?.price || 0)} ₴
+                    </p>
+                  </div>
+                  <button 
+                    onClick={handleConfirmBooking}
+                    className="btn-primary px-8 py-3"
+                  >
+                    Оформити
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
