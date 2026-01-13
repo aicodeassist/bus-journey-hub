@@ -163,6 +163,12 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
       y === selectedDate.getFullYear()
     );
   };
+  // Check if a day is weekend (Saturday = 5, Sunday = 6 in our grid starting from Monday)
+  const isWeekend = (day: number, month: number, year: number) => {
+    const date = new Date(year, month, day);
+    const dayOfWeek = date.getDay();
+    return dayOfWeek === 0 || dayOfWeek === 6; // Sunday = 0, Saturday = 6
+  };
 
   const MonthCalendar = ({ month, year, showHeader = true }: { month: number; year: number; showHeader?: boolean }) => {
     const daysInMonth = getDaysInMonth(month, year);
@@ -185,6 +191,7 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
             const disabled = isDateDisabled(day, month, year);
             const selected = isSelected(day, month, year);
             const todayDay = isTodayDate(day, month, year);
+            const weekend = isWeekend(day, month, year);
             
             return (
               <button
@@ -204,6 +211,10 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
                   }
                   ${todayDay && !selected 
                     ? "ring-2 ring-accent ring-inset" 
+                    : ""
+                  }
+                  ${weekend && !selected && !disabled
+                    ? "text-destructive"
                     : ""
                   }
                 `}
@@ -253,8 +264,13 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
 
         {/* Weekdays */}
         <div className="grid grid-cols-7 gap-1 mb-3">
-          {WEEKDAYS_UK.map(day => (
-            <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
+          {WEEKDAYS_UK.map((day, index) => (
+            <div 
+              key={day} 
+              className={`text-center text-sm font-medium py-2 ${
+                index >= 5 ? "text-destructive" : "text-muted-foreground"
+              }`}
+            >
               {day}
             </div>
           ))}
@@ -269,6 +285,7 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
             const disabled = isDateDisabled(day);
             const selected = isSelected(day);
             const todayDay = isTodayDate(day);
+            const weekend = isWeekend(day, currentMonth.month, currentMonth.year);
             
             return (
               <button
@@ -288,6 +305,10 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
                   }
                   ${todayDay && !selected 
                     ? "ring-2 ring-accent ring-inset" 
+                    : ""
+                  }
+                  ${weekend && !selected && !disabled
+                    ? "text-destructive"
                     : ""
                   }
                 `}
@@ -336,8 +357,13 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
                 {/* Fixed Weekdays Header */}
                 <div className="px-6 pt-4 pb-2 border-b border-border bg-background">
                   <div className="grid grid-cols-7 gap-1">
-                    {WEEKDAYS_UK.map(day => (
-                      <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
+                    {WEEKDAYS_UK.map((day, index) => (
+                      <div 
+                        key={day} 
+                        className={`text-center text-sm font-medium py-2 ${
+                          index >= 5 ? "text-destructive" : "text-muted-foreground"
+                        }`}
+                      >
                         {day}
                       </div>
                     ))}
