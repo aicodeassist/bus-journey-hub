@@ -129,7 +129,7 @@ const SearchForm = ({ variant = "hero", initialData }: SearchFormProps) => {
             <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent z-10 pointer-events-none" />
             
             {/* Departure Date */}
-            <div className="relative flex-1 h-full flex flex-col justify-center pl-12 pr-2">
+            <div className="relative flex-1 h-full flex flex-col justify-center pl-12 pr-3">
               <span className="text-[10px] font-medium text-muted-foreground leading-none">
                 Туди
               </span>
@@ -140,11 +140,11 @@ const SearchForm = ({ variant = "hero", initialData }: SearchFormProps) => {
               />
             </div>
             
-            {/* Divider */}
-            <div className="w-px h-8 bg-border flex-shrink-0" />
+            {/* Divider - centered */}
+            <div className="w-px h-8 bg-border" />
             
             {/* Return Date */}
-            <div className="relative flex-1 h-full flex flex-col justify-center pl-3 pr-2">
+            <div className="relative flex-1 h-full flex flex-col justify-center pl-3 pr-3">
               <span className="text-[10px] font-medium text-muted-foreground leading-none">
                 Назад
               </span>
