@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { ChevronLeft, ChevronRight, X, Calendar } from "lucide-react";
 
 interface DatePickerProps {
@@ -27,6 +27,28 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
     return { month: now.getMonth(), year: now.getFullYear() };
   });
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const today = useMemo(() => {
+    const now = new Date();
+    return { month: now.getMonth(), year: now.getFullYear() };
+  }, []);
+
+  // Generate 12 months ahead for mobile scroll
+  const monthsToShow = useMemo(() => {
+    const months = [];
+    let m = today.month;
+    let y = today.year;
+    for (let i = 0; i < 12; i++) {
+      months.push({ month: m, year: y });
+      m++;
+      if (m > 11) {
+        m = 0;
+        y++;
+      }
+    }
+    return months;
+  }, [today]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -73,7 +95,13 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
     return `${date.getDate()} ${MONTHS_UK[date.getMonth()].slice(0, 3)}`;
   };
 
+  const canGoPrev = () => {
+    return currentMonth.year > today.year || 
+           (currentMonth.year === today.year && currentMonth.month > today.month);
+  };
+
   const handlePrevMonth = () => {
+    if (!canGoPrev()) return;
     setCurrentMonth(prev => {
       if (prev.month === 0) {
         return { month: 11, year: prev.year - 1 };
@@ -91,119 +119,187 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
     });
   };
 
-  const handleSelectDate = (day: number) => {
-    const dateStr = `${currentMonth.year}-${String(currentMonth.month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const handleSelectDate = (day: number, month?: number, year?: number) => {
+    const m = month ?? currentMonth.month;
+    const y = year ?? currentMonth.year;
+    const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     onChange(dateStr);
     setIsOpen(false);
   };
 
-  const isDateDisabled = (day: number) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const checkDate = new Date(currentMonth.year, currentMonth.month, day);
+  const isDateDisabled = (day: number, month?: number, year?: number) => {
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    const m = month ?? currentMonth.month;
+    const y = year ?? currentMonth.year;
+    const checkDate = new Date(y, m, day);
     
-    if (checkDate < today) return true;
+    if (checkDate < todayDate) return true;
     
     if (!minDate) return false;
-    const dateStr = `${currentMonth.year}-${String(currentMonth.month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     return dateStr < minDate;
   };
 
-  const isToday = (day: number) => {
-    const today = new Date();
+  const isTodayDate = (day: number, month?: number, year?: number) => {
+    const todayDate = new Date();
+    const m = month ?? currentMonth.month;
+    const y = year ?? currentMonth.year;
     return (
-      day === today.getDate() &&
-      currentMonth.month === today.getMonth() &&
-      currentMonth.year === today.getFullYear()
+      day === todayDate.getDate() &&
+      m === todayDate.getMonth() &&
+      y === todayDate.getFullYear()
     );
   };
 
-  const isSelected = (day: number) => {
+  const isSelected = (day: number, month?: number, year?: number) => {
     if (!value) return false;
     const selectedDate = new Date(value);
+    const m = month ?? currentMonth.month;
+    const y = year ?? currentMonth.year;
     return (
       day === selectedDate.getDate() &&
-      currentMonth.month === selectedDate.getMonth() &&
-      currentMonth.year === selectedDate.getFullYear()
+      m === selectedDate.getMonth() &&
+      y === selectedDate.getFullYear()
     );
   };
 
-  const daysInMonth = getDaysInMonth(currentMonth.month, currentMonth.year);
-  const firstDay = getFirstDayOfMonth(currentMonth.month, currentMonth.year);
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  const emptyDays = Array.from({ length: firstDay }, (_, i) => i);
+  const MonthCalendar = ({ month, year, showHeader = true }: { month: number; year: number; showHeader?: boolean }) => {
+    const daysInMonth = getDaysInMonth(month, year);
+    const firstDay = getFirstDayOfMonth(month, year);
+    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    const emptyDays = Array.from({ length: firstDay }, (_, i) => i);
 
-  const CalendarContent = () => (
-    <>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button
-          type="button"
-          onClick={handlePrevMonth}
-          className="p-3 rounded-xl hover:bg-secondary transition-colors"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <span className="font-semibold text-lg text-foreground">
-          {MONTHS_UK[currentMonth.month]} {currentMonth.year}
-        </span>
-        <button
-          type="button"
-          onClick={handleNextMonth}
-          className="p-3 rounded-xl hover:bg-secondary transition-colors"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
+    return (
+      <div className="mb-8 last:mb-0">
+        {showHeader && (
+          <h3 className="font-semibold text-lg text-foreground mb-4 px-1">
+            {MONTHS_UK[month]} {year}
+          </h3>
+        )}
+        <div className="grid grid-cols-7 gap-1">
+          {emptyDays.map(i => (
+            <div key={`empty-${i}`} className="aspect-square" />
+          ))}
+          {days.map(day => {
+            const disabled = isDateDisabled(day, month, year);
+            const selected = isSelected(day, month, year);
+            const todayDay = isTodayDate(day, month, year);
+            
+            return (
+              <button
+                key={day}
+                type="button"
+                onClick={() => !disabled && handleSelectDate(day, month, year)}
+                disabled={disabled}
+                className={`
+                  aspect-square rounded-xl text-base font-medium transition-all flex items-center justify-center
+                  ${disabled 
+                    ? "text-muted-foreground/30 cursor-not-allowed" 
+                    : "hover:bg-accent/10 cursor-pointer active:scale-95"
+                  }
+                  ${selected 
+                    ? "bg-accent text-accent-foreground shadow-lg" 
+                    : ""
+                  }
+                  ${todayDay && !selected 
+                    ? "ring-2 ring-accent ring-inset" 
+                    : ""
+                  }
+                `}
+              >
+                {day}
+              </button>
+            );
+          })}
+        </div>
       </div>
+    );
+  };
 
-      {/* Weekdays */}
-      <div className="grid grid-cols-7 gap-1 mb-3">
-        {WEEKDAYS_UK.map(day => (
-          <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
-            {day}
-          </div>
-        ))}
-      </div>
+  const DesktopCalendarContent = () => {
+    const daysInMonth = getDaysInMonth(currentMonth.month, currentMonth.year);
+    const firstDay = getFirstDayOfMonth(currentMonth.month, currentMonth.year);
+    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    const emptyDays = Array.from({ length: firstDay }, (_, i) => i);
 
-      {/* Days */}
-      <div className="grid grid-cols-7 gap-1">
-        {emptyDays.map(i => (
-          <div key={`empty-${i}`} className="aspect-square" />
-        ))}
-        {days.map(day => {
-          const disabled = isDateDisabled(day);
-          const selected = isSelected(day);
-          const today = isToday(day);
-          
-          return (
-            <button
-              key={day}
-              type="button"
-              onClick={() => !disabled && handleSelectDate(day)}
-              disabled={disabled}
-              className={`
-                aspect-square rounded-xl text-base font-medium transition-all flex items-center justify-center
-                ${disabled 
-                  ? "text-muted-foreground/30 cursor-not-allowed" 
-                  : "hover:bg-accent/10 cursor-pointer active:scale-95"
-                }
-                ${selected 
-                  ? "bg-accent text-accent-foreground shadow-lg" 
-                  : ""
-                }
-                ${today && !selected 
-                  ? "ring-2 ring-accent ring-inset" 
-                  : ""
-                }
-              `}
-            >
+    return (
+      <>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            type="button"
+            onClick={handlePrevMonth}
+            disabled={!canGoPrev()}
+            className={`p-3 rounded-xl transition-colors ${
+              canGoPrev() 
+                ? "hover:bg-secondary cursor-pointer" 
+                : "opacity-30 cursor-not-allowed"
+            }`}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <span className="font-semibold text-lg text-foreground">
+            {MONTHS_UK[currentMonth.month]} {currentMonth.year}
+          </span>
+          <button
+            type="button"
+            onClick={handleNextMonth}
+            className="p-3 rounded-xl hover:bg-secondary transition-colors"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Weekdays */}
+        <div className="grid grid-cols-7 gap-1 mb-3">
+          {WEEKDAYS_UK.map(day => (
+            <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
               {day}
-            </button>
-          );
-        })}
-      </div>
-    </>
-  );
+            </div>
+          ))}
+        </div>
+
+        {/* Days */}
+        <div className="grid grid-cols-7 gap-1">
+          {emptyDays.map(i => (
+            <div key={`empty-${i}`} className="aspect-square" />
+          ))}
+          {days.map(day => {
+            const disabled = isDateDisabled(day);
+            const selected = isSelected(day);
+            const todayDay = isTodayDate(day);
+            
+            return (
+              <button
+                key={day}
+                type="button"
+                onClick={() => !disabled && handleSelectDate(day)}
+                disabled={disabled}
+                className={`
+                  aspect-square rounded-xl text-base font-medium transition-all flex items-center justify-center
+                  ${disabled 
+                    ? "text-muted-foreground/30 cursor-not-allowed" 
+                    : "hover:bg-accent/10 cursor-pointer active:scale-95"
+                  }
+                  ${selected 
+                    ? "bg-accent text-accent-foreground shadow-lg" 
+                    : ""
+                  }
+                  ${todayDay && !selected 
+                    ? "ring-2 ring-accent ring-inset" 
+                    : ""
+                  }
+                `}
+              >
+                {day}
+              </button>
+            );
+          })}
+        </div>
+      </>
+    );
+  };
 
   return (
     <div ref={containerRef} className="relative">
@@ -222,7 +318,7 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
       {isOpen && (
         <>
           {isMobile ? (
-            /* Fullscreen mobile view */
+            /* Fullscreen mobile view with scroll */
             <div className="fixed inset-0 z-50 bg-background animate-in slide-in-from-bottom duration-300">
               <div className="flex flex-col h-full">
                 {/* Mobile Header */}
@@ -237,9 +333,30 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
                   </button>
                 </div>
 
-                {/* Calendar */}
-                <div className="flex-1 p-6 overflow-auto">
-                  <CalendarContent />
+                {/* Fixed Weekdays Header */}
+                <div className="px-6 pt-4 pb-2 border-b border-border bg-background">
+                  <div className="grid grid-cols-7 gap-1">
+                    {WEEKDAYS_UK.map(day => (
+                      <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Scrollable Months */}
+                <div 
+                  ref={scrollContainerRef}
+                  className="flex-1 overflow-y-auto px-6 py-4"
+                >
+                  {monthsToShow.map(({ month, year }) => (
+                    <MonthCalendar 
+                      key={`${year}-${month}`} 
+                      month={month} 
+                      year={year}
+                      showHeader={true}
+                    />
+                  ))}
                 </div>
 
                 {/* Footer */}
@@ -265,7 +382,7 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
           ) : (
             /* Desktop dropdown */
             <div className="absolute top-full left-0 mt-2 bg-card rounded-2xl shadow-card border border-border z-50 p-5 min-w-[320px] animate-fade-in">
-              <CalendarContent />
+              <DesktopCalendarContent />
             </div>
           )}
         </>
