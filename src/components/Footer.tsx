@@ -103,7 +103,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-3 text-primary-foreground/70">
                 <Mail className="w-5 h-5 text-accent" />
-                <span>info@bustik.ua</span>
+                <span>info@busbooking.ua</span>
               </li>
               <li className="flex items-start gap-3 text-primary-foreground/70">
                 <MapPin className="w-5 h-5 text-accent flex-shrink-0" />
@@ -116,7 +116,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="border-t border-primary-foreground/10 mt-10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-primary-foreground/50 text-sm text-center md:text-left">
-            © 2025 БусТік. Всі права захищено.
+            © 2026 busbooking. Всі права захищено.
           </p>
           <div className="flex items-center gap-6">
             <a href="#" className="text-primary-foreground/50 hover:text-accent text-sm transition-colors">
