@@ -12,7 +12,7 @@ const Footer = () => {
               <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
                 <Bus className="w-5 h-5 text-accent-foreground" />
               </div>
-              <span className="font-display font-bold text-xl">БусТік</span>
+              <span className="font-display font-bold text-xl">busbooking</span>
             </Link>
             <p className="text-primary-foreground/70 mb-6">
               Найкращий сервіс для пошуку та бронювання автобусних квитків по всій Україні.
