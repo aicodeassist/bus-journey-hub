@@ -1,5 +1,6 @@
 import { Clock, MapPin, Bus, Wifi, Snowflake, Plug, Star, Droplets, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
+import RouteTimeline from "./RouteTimeline";
 
 interface RouteCardProps {
   id: string;
@@ -155,23 +156,43 @@ const RouteCard = ({
             {/* Route Info */}
             <div>
               <h4 className="font-semibold text-foreground mb-3">Маршрут</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-accent mt-1.5" />
-                  <div>
-                    <p className="font-medium">{departureTime} - {departureCity}</p>
-                    <p className="text-muted-foreground">Центральний автовокзал</p>
-                  </div>
-                </div>
-                <div className="ml-1 border-l-2 border-dashed border-border h-6" />
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-1.5" />
-                  <div>
-                    <p className="font-medium">{arrivalTime} - {arrivalCity}</p>
-                    <p className="text-muted-foreground">Головний автовокзал</p>
-                  </div>
-                </div>
-              </div>
+              <RouteTimeline 
+                stops={[
+                  { 
+                    time: departureTime, 
+                    date: "18 січ.", 
+                    city: departureCity, 
+                    station: "Автостанція (центральний залізничний вокзал), метро Вокзальна; вулиця Симона Петлюри; дом 32" 
+                  },
+                  { 
+                    time: "08:00", 
+                    city: "Київ", 
+                    station: "АС \"Перша\" (р-н Осокорки, парковка Новус) вулиця Здолбунівська, 7Г" 
+                  },
+                  { 
+                    time: "10:30", 
+                    city: "Черкаси", 
+                    station: "Черкаси, Черкаська автостанція №2 вулиця Володимира Ложешнікова, 7" 
+                  },
+                  { 
+                    time: "12:55", 
+                    city: "Кропивницький", 
+                    station: "Кропивницький, АЗС \"УКРНАФТА\" Олександрійське шосе, 3" 
+                  },
+                  { 
+                    time: "14:55", 
+                    city: "Кривий Ріг", 
+                    station: "Кривий Ріг, Центральний Автовокзал Дніпропетровське шосе, 1А" 
+                  },
+                  { 
+                    time: arrivalTime, 
+                    date: "18 січ.", 
+                    city: arrivalCity, 
+                    station: "Автовокзал \"Центральний\", вулиця 128-ї Бригади Тероборони; дом 10" 
+                  },
+                ]}
+                showIntermediateStops={true}
+              />
             </div>
 
             {/* Amenities */}
