@@ -6,153 +6,145 @@ import Footer from "@/components/Footer";
 import { Filter, SortAsc, ChevronDown, X, ArrowRight, ArrowLeft } from "lucide-react";
 import { useState, useMemo } from "react";
 
-// Mock data for search results
-const mockRoutes = [
-  {
-    id: "1",
-    carrier: "Автолюкс",
-    carrierRating: 4.8,
-    departureTime: "06:30",
-    arrivalTime: "12:45",
-    departureCity: "Київ",
-    arrivalCity: "Львів",
-    duration: "6г 15хв",
-    price: 450,
-    seatsAvailable: 12,
-    amenities: ["wifi", "ac", "power"],
-    busType: "Комфорт",
-  },
-  {
-    id: "2",
-    carrier: "Gunsel",
-    carrierRating: 4.9,
-    departureTime: "08:00",
-    arrivalTime: "13:30",
-    departureCity: "Київ",
-    arrivalCity: "Львів",
-    duration: "5г 30хв",
-    price: 520,
-    seatsAvailable: 4,
-    amenities: ["wifi", "ac", "power", "wc"],
-    busType: "VIP",
-  },
-  {
-    id: "3",
-    carrier: "УкрБус",
-    carrierRating: 4.5,
-    departureTime: "10:15",
-    arrivalTime: "17:00",
-    departureCity: "Київ",
-    arrivalCity: "Львів",
-    duration: "6г 45хв",
-    price: 380,
-    seatsAvailable: 23,
-    amenities: ["ac"],
-    busType: "Стандарт",
-  },
-  {
-    id: "4",
-    carrier: "Автолюкс",
-    carrierRating: 4.8,
-    departureTime: "14:00",
-    arrivalTime: "19:45",
-    departureCity: "Київ",
-    arrivalCity: "Львів",
-    duration: "5г 45хв",
-    price: 480,
-    seatsAvailable: 8,
-    amenities: ["wifi", "ac", "power"],
-    busType: "Комфорт",
-  },
-  {
-    id: "5",
-    carrier: "EuroClub",
-    carrierRating: 4.7,
-    departureTime: "16:30",
-    arrivalTime: "22:15",
-    departureCity: "Київ",
-    arrivalCity: "Львів",
-    duration: "5г 45хв",
-    price: 490,
-    seatsAvailable: 15,
-    amenities: ["wifi", "ac", "wc"],
-    busType: "Комфорт",
-  },
-  {
-    id: "6",
-    carrier: "Night Express",
-    carrierRating: 4.6,
-    departureTime: "22:00",
-    arrivalTime: "05:30",
-    departureCity: "Київ",
-    arrivalCity: "Львів",
-    duration: "7г 30хв",
-    price: 420,
-    seatsAvailable: 18,
-    amenities: ["wifi", "ac", "power"],
-    busType: "Нічний",
-  },
-];
+// Generate mock routes based on search parameters
+const generateMockRoutes = (from: string, to: string, isReturn = false) => {
+  const baseRoutes = [
+    {
+      id: isReturn ? "r1" : "1",
+      carrier: "Автолюкс",
+      carrierRating: 4.8,
+      departureTime: "06:30",
+      arrivalTime: "12:45",
+      duration: "6г 15хв",
+      price: 450,
+      seatsAvailable: 12,
+      amenities: ["wifi", "ac", "power"],
+      busType: "Комфорт",
+      stops: [
+        { time: "06:30", date: "18 січ.", city: from, station: `${from}, Центральний автовокзал` },
+        { time: "09:00", city: "Полтава", station: "Полтава, Автостанція №1, вул. Шевченка, 15" },
+        { time: "10:45", city: "Кременчук", station: "Кременчук, АС Центральна, пр. Свободи, 22" },
+        { time: "12:45", date: "18 січ.", city: to, station: `${to}, Центральний автовокзал` },
+      ],
+    },
+    {
+      id: isReturn ? "r2" : "2",
+      carrier: "Gunsel",
+      carrierRating: 4.9,
+      departureTime: "08:00",
+      arrivalTime: "13:30",
+      duration: "5г 30хв",
+      price: 520,
+      seatsAvailable: 4,
+      amenities: ["wifi", "ac", "power", "wc"],
+      busType: "VIP",
+      stops: [
+        { time: "08:00", date: "18 січ.", city: from, station: `${from}, Центральний автовокзал` },
+        { time: "13:30", date: "18 січ.", city: to, station: `${to}, Центральний автовокзал` },
+      ],
+    },
+    {
+      id: isReturn ? "r3" : "3",
+      carrier: "УкрБус",
+      carrierRating: 4.5,
+      departureTime: "10:15",
+      arrivalTime: "17:00",
+      duration: "6г 45хв",
+      price: 380,
+      seatsAvailable: 23,
+      amenities: ["ac"],
+      busType: "Стандарт",
+      stops: [
+        { time: "10:15", date: "18 січ.", city: from, station: `${from}, Автостанція Центральна` },
+        { time: "12:30", city: "Новомосковськ", station: "Новомосковськ, АС, вул. Гетьманська, 5" },
+        { time: "14:15", city: "Павлоград", station: "Павлоград, Автовокзал, пр. Центральний, 88" },
+        { time: "15:45", city: "Лозова", station: "Лозова, АС, вул. Незалежності, 12" },
+        { time: "17:00", date: "18 січ.", city: to, station: `${to}, Центральний автовокзал` },
+      ],
+    },
+    {
+      id: isReturn ? "r4" : "4",
+      carrier: "Автолюкс",
+      carrierRating: 4.8,
+      departureTime: "14:00",
+      arrivalTime: "19:45",
+      duration: "5г 45хв",
+      price: 480,
+      seatsAvailable: 8,
+      amenities: ["wifi", "ac", "power"],
+      busType: "Комфорт",
+      stops: [
+        { time: "14:00", date: "18 січ.", city: from, station: `${from}, Центральний автовокзал` },
+        { time: "16:30", city: "Красноград", station: "Красноград, АС, вул. Полтавська, 45" },
+        { time: "19:45", date: "18 січ.", city: to, station: `${to}, Центральний автовокзал` },
+      ],
+    },
+    {
+      id: isReturn ? "r5" : "5",
+      carrier: "EuroClub",
+      carrierRating: 4.7,
+      departureTime: "16:30",
+      arrivalTime: "22:15",
+      duration: "5г 45хв",
+      price: 490,
+      seatsAvailable: 15,
+      amenities: ["wifi", "ac", "wc"],
+      busType: "Комфорт",
+      stops: [
+        { time: "16:30", date: "18 січ.", city: from, station: `${from}, Центральний автовокзал` },
+        { time: "19:00", city: "Чугуїв", station: "Чугуїв, АС, вул. Харківська, 100" },
+        { time: "22:15", date: "18 січ.", city: to, station: `${to}, Центральний автовокзал` },
+      ],
+    },
+    {
+      id: isReturn ? "r6" : "6",
+      carrier: "Night Express",
+      carrierRating: 4.6,
+      departureTime: "22:00",
+      arrivalTime: "05:30",
+      duration: "7г 30хв",
+      price: 420,
+      seatsAvailable: 18,
+      amenities: ["wifi", "ac", "power"],
+      busType: "Нічний",
+      stops: [
+        { time: "22:00", date: "18 січ.", city: from, station: `${from}, Центральний автовокзал` },
+        { time: "00:30", city: "Полтава", station: "Полтава, Автостанція №1, вул. Шевченка, 15" },
+        { time: "02:45", city: "Кременчук", station: "Кременчук, АС Центральна, пр. Свободи, 22" },
+        { time: "05:30", date: "19 січ.", city: to, station: `${to}, Центральний автовокзал` },
+      ],
+    },
+  ];
 
-// Mock data for return routes
-const mockReturnRoutes = [
-  {
-    id: "r1",
-    carrier: "Автолюкс",
-    carrierRating: 4.8,
-    departureTime: "07:00",
-    arrivalTime: "13:15",
-    departureCity: "Львів",
-    arrivalCity: "Київ",
-    duration: "6г 15хв",
-    price: 450,
-    seatsAvailable: 15,
-    amenities: ["wifi", "ac", "power"],
-    busType: "Комфорт",
-  },
-  {
-    id: "r2",
-    carrier: "Gunsel",
-    carrierRating: 4.9,
-    departureTime: "09:30",
-    arrivalTime: "15:00",
-    departureCity: "Львів",
-    arrivalCity: "Київ",
-    duration: "5г 30хв",
-    price: 520,
-    seatsAvailable: 6,
-    amenities: ["wifi", "ac", "power", "wc"],
-    busType: "VIP",
-  },
-  {
-    id: "r3",
-    carrier: "УкрБус",
-    carrierRating: 4.5,
-    departureTime: "11:00",
-    arrivalTime: "17:45",
-    departureCity: "Львів",
-    arrivalCity: "Київ",
-    duration: "6г 45хв",
-    price: 380,
-    seatsAvailable: 20,
-    amenities: ["ac"],
-    busType: "Стандарт",
-  },
-  {
-    id: "r4",
-    carrier: "EuroClub",
-    carrierRating: 4.7,
-    departureTime: "15:00",
-    arrivalTime: "20:45",
-    departureCity: "Львів",
-    arrivalCity: "Київ",
-    duration: "5г 45хв",
-    price: 490,
-    seatsAvailable: 10,
-    amenities: ["wifi", "ac", "wc"],
-    busType: "Комфорт",
-  },
-];
+  return baseRoutes.map(route => ({
+    ...route,
+    departureCity: isReturn ? to : from,
+    arrivalCity: isReturn ? from : to,
+  }));
+};
+
+interface RouteStop {
+  time: string;
+  date?: string;
+  city: string;
+  station: string;
+}
+
+interface Route {
+  id: string;
+  carrier: string;
+  carrierRating: number;
+  departureTime: string;
+  arrivalTime: string;
+  departureCity: string;
+  arrivalCity: string;
+  duration: string;
+  price: number;
+  seatsAvailable: number;
+  amenities: string[];
+  busType: string;
+  stops: RouteStop[];
+}
 
 interface Filters {
   timeSlots: string[];
@@ -258,8 +250,12 @@ const SearchResults = () => {
     }
   };
 
+  // Generate routes based on search parameters
+  const outboundRoutes = useMemo(() => generateMockRoutes(from, to, false), [from, to]);
+  const returnRoutes = useMemo(() => generateMockRoutes(to, from, true), [from, to]);
+
   // Filter logic
-  const applyFilters = (routes: typeof mockRoutes) => {
+  const applyFilters = (routes: Route[]) => {
     return routes.filter(route => {
       // Time slot filter
       if (filters.timeSlots.length > 0) {
@@ -296,7 +292,7 @@ const SearchResults = () => {
   };
 
   // Sort logic
-  const applySort = (routes: typeof mockRoutes) => {
+  const applySort = (routes: Route[]) => {
     return [...routes].sort((a, b) => {
       if (sortBy === "price") return a.price - b.price;
       if (sortBy === "time") return a.departureTime.localeCompare(b.departureTime);
@@ -311,8 +307,8 @@ const SearchResults = () => {
     });
   };
 
-  const sortedOutboundRoutes = useMemo(() => applySort(applyFilters(mockRoutes)), [filters, sortBy]);
-  const sortedReturnRoutes = useMemo(() => applySort(applyFilters(mockReturnRoutes)), [filters, sortBy]);
+  const sortedOutboundRoutes = useMemo(() => applySort(applyFilters(outboundRoutes)), [filters, sortBy, outboundRoutes]);
+  const sortedReturnRoutes = useMemo(() => applySort(applyFilters(returnRoutes)), [filters, sortBy, returnRoutes]);
 
   const currentRoutes = activeTab === "outbound" ? sortedOutboundRoutes : sortedReturnRoutes;
 
@@ -341,8 +337,8 @@ const SearchResults = () => {
     (filters.priceMin ? 1 : 0) + 
     (filters.priceMax ? 1 : 0);
 
-  const selectedOutboundRoute = mockRoutes.find(r => r.id === selectedOutbound);
-  const selectedReturnRoute = mockReturnRoutes.find(r => r.id === selectedReturn);
+  const selectedOutboundRoute = outboundRoutes.find(r => r.id === selectedOutbound);
+  const selectedReturnRoute = returnRoutes.find(r => r.id === selectedReturn);
 
   return (
     <div className="min-h-screen bg-background">

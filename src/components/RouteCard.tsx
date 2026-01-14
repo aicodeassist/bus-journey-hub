@@ -2,6 +2,13 @@ import { Clock, MapPin, Bus, Wifi, Snowflake, Plug, Star, Droplets, ChevronDown,
 import { useState } from "react";
 import RouteTimeline from "./RouteTimeline";
 
+interface RouteStop {
+  time: string;
+  date?: string;
+  city: string;
+  station: string;
+}
+
 interface RouteCardProps {
   id: string;
   carrier: string;
@@ -15,6 +22,7 @@ interface RouteCardProps {
   seatsAvailable: number;
   amenities: string[];
   busType: string;
+  stops?: RouteStop[];
   onSelect?: () => void;
   isSelected?: boolean;
 }
@@ -38,6 +46,7 @@ const RouteCard = ({
   seatsAvailable,
   amenities,
   busType,
+  stops,
   onSelect,
   isSelected = false,
 }: RouteCardProps) => {
@@ -157,39 +166,9 @@ const RouteCard = ({
             <div>
               <h4 className="font-semibold text-foreground mb-3">Маршрут</h4>
               <RouteTimeline 
-                stops={[
-                  { 
-                    time: departureTime, 
-                    date: "18 січ.", 
-                    city: departureCity, 
-                    station: "Автостанція (центральний залізничний вокзал), метро Вокзальна; вулиця Симона Петлюри; дом 32" 
-                  },
-                  { 
-                    time: "08:00", 
-                    city: "Київ", 
-                    station: "АС \"Перша\" (р-н Осокорки, парковка Новус) вулиця Здолбунівська, 7Г" 
-                  },
-                  { 
-                    time: "10:30", 
-                    city: "Черкаси", 
-                    station: "Черкаси, Черкаська автостанція №2 вулиця Володимира Ложешнікова, 7" 
-                  },
-                  { 
-                    time: "12:55", 
-                    city: "Кропивницький", 
-                    station: "Кропивницький, АЗС \"УКРНАФТА\" Олександрійське шосе, 3" 
-                  },
-                  { 
-                    time: "14:55", 
-                    city: "Кривий Ріг", 
-                    station: "Кривий Ріг, Центральний Автовокзал Дніпропетровське шосе, 1А" 
-                  },
-                  { 
-                    time: arrivalTime, 
-                    date: "18 січ.", 
-                    city: arrivalCity, 
-                    station: "Автовокзал \"Центральний\", вулиця 128-ї Бригади Тероборони; дом 10" 
-                  },
+                stops={stops || [
+                  { time: departureTime, city: departureCity, station: `${departureCity}, Центральний автовокзал` },
+                  { time: arrivalTime, city: arrivalCity, station: `${arrivalCity}, Центральний автовокзал` },
                 ]}
                 showIntermediateStops={true}
               />
