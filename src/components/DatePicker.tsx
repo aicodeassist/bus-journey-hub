@@ -6,6 +6,8 @@ interface DatePickerProps {
   onChange: (date: string) => void;
   placeholder?: string;
   minDate?: string;
+  /** Show quick date selection buttons (Today, Tomorrow, Day after tomorrow) */
+  showQuickDates?: boolean;
 }
 
 const MONTHS_UK = [
@@ -15,7 +17,7 @@ const MONTHS_UK = [
 
 const WEEKDAYS_UK = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
 
-const DatePicker = ({ value, onChange, placeholder = "Виберіть дату", minDate }: DatePickerProps) => {
+const DatePicker = ({ value, onChange, placeholder = "Виберіть дату", minDate, showQuickDates = true }: DatePickerProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(() => {
@@ -49,6 +51,29 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
     }
     return months;
   }, [today]);
+
+  // Quick date options
+  const quickDates = useMemo(() => {
+    const todayDate = new Date();
+    const tomorrow = new Date(todayDate);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const dayAfter = new Date(todayDate);
+    dayAfter.setDate(dayAfter.getDate() + 2);
+    
+    const formatDate = (d: Date) => 
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    
+    return [
+      { label: "Сьогодні", date: formatDate(todayDate) },
+      { label: "Завтра", date: formatDate(tomorrow) },
+      { label: "Післязавтра", date: formatDate(dayAfter) },
+    ];
+  }, []);
+
+  const isQuickDateDisabled = (dateStr: string) => {
+    if (!minDate) return false;
+    return dateStr < minDate;
+  };
 
   useEffect(() => {
     const checkMobile = () => {
@@ -318,6 +343,37 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
             );
           })}
         </div>
+
+        {/* Quick Dates */}
+        {showQuickDates && (
+          <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+            {quickDates.map(({ label, date }) => {
+              const disabled = isQuickDateDisabled(date);
+              const selected = value === date;
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => !disabled && onChange(date)}
+                  disabled={disabled}
+                  className={`
+                    flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all
+                    ${disabled 
+                      ? "text-muted-foreground/30 cursor-not-allowed bg-secondary/30" 
+                      : "hover:bg-accent/10 cursor-pointer active:scale-95 bg-secondary"
+                    }
+                    ${selected 
+                      ? "bg-accent text-accent-foreground" 
+                      : ""
+                    }
+                  `}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </>
     );
   };
@@ -353,6 +409,42 @@ const DatePicker = ({ value, onChange, placeholder = "Виберіть дату"
                     <X className="w-6 h-6" />
                   </button>
                 </div>
+
+                {/* Quick Dates - Mobile */}
+                {showQuickDates && (
+                  <div className="flex gap-2 px-6 py-3 border-b border-border bg-background">
+                    {quickDates.map(({ label, date }) => {
+                      const disabled = isQuickDateDisabled(date);
+                      const selected = value === date;
+                      return (
+                        <button
+                          key={label}
+                          type="button"
+                          onClick={() => {
+                            if (!disabled) {
+                              onChange(date);
+                              setIsOpen(false);
+                            }
+                          }}
+                          disabled={disabled}
+                          className={`
+                            flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all
+                            ${disabled 
+                              ? "text-muted-foreground/30 cursor-not-allowed bg-secondary/30" 
+                              : "hover:bg-accent/10 cursor-pointer active:scale-95 bg-secondary"
+                            }
+                            ${selected 
+                              ? "bg-accent text-accent-foreground" 
+                              : ""
+                            }
+                          `}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Fixed Weekdays Header */}
                 <div className="px-6 pt-4 pb-2 border-b border-border bg-background">
