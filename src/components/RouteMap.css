@@ -1,0 +1,151 @@
+/* Route Map Styles - Pure CSS */
+
+.route-map-container {
+  width: 100%;
+  height: 300px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background: #f3f4f6;
+}
+
+@media (min-width: 768px) {
+  .route-map-container {
+    height: 350px;
+  }
+}
+
+.route-map-placeholder {
+  width: 100%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Custom marker styles */
+.custom-marker {
+  background: transparent;
+  border: none;
+}
+
+/* Popup styles */
+.route-map-popup {
+  font-family: inherit;
+  padding: 4px;
+}
+
+.route-map-popup strong {
+  font-size: 14px;
+  color: #111827;
+}
+
+.route-map-popup .text-sm {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.route-map-popup .text-muted {
+  color: #9ca3af;
+}
+
+/* Legend */
+.route-map-legend {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #374151;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.legend-dot.start {
+  background: #10b981;
+}
+
+.legend-dot.stop {
+  background: #f59e0b;
+}
+
+.legend-dot.end {
+  background: #6366f1;
+}
+
+/* Leaflet overrides */
+.leaflet-container {
+  font-family: inherit;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-content {
+  margin: 12px;
+}
+
+.leaflet-popup-tip {
+  background: white;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .route-map-placeholder {
+    background: #1f2937;
+    color: #9ca3af;
+  }
+  
+  .route-map-legend {
+    background: rgba(31, 41, 55, 0.95);
+    color: #d1d5db;
+  }
+  
+  .legend-dot {
+    border-color: #374151;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .route-map-legend {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  
+  .legend-item {
+    gap: 4px;
+  }
+  
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+  }
+}
