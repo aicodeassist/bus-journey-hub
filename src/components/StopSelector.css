@@ -1,0 +1,374 @@
+/* Stop Selector Styles - Pure CSS */
+
+.stop-selector {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.stop-selector__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.stop-selector__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.stop-selector__price-diff {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.stop-selector__price-diff--savings {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.stop-selector__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.stop-selector__field {
+  position: relative;
+}
+
+.stop-selector__label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stop-selector__dropdown-wrapper {
+  position: relative;
+}
+
+.stop-selector__button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.stop-selector__button:hover {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.stop-selector__button-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stop-selector__indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stop-selector__indicator--boarding {
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.stop-selector__indicator--alighting {
+  background: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.stop-selector__button-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stop-selector__city {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.stop-selector__time {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.stop-selector__dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+  max-height: 280px;
+  overflow-y: auto;
+  animation: dropdownSlide 0.2s ease;
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stop-selector__option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.stop-selector__option:last-child {
+  border-bottom: none;
+}
+
+.stop-selector__option:hover {
+  background: #f8fafc;
+}
+
+.stop-selector__option--selected {
+  background: #f0f9ff;
+}
+
+.stop-selector__option--selected:hover {
+  background: #e0f2fe;
+}
+
+.stop-selector__option-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.stop-selector__option-time {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  min-width: 45px;
+}
+
+.stop-selector__option-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stop-selector__option-city {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.stop-selector__option-station {
+  font-size: 12px;
+  color: #64748b;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Connector between fields */
+.stop-selector__connector {
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 20px;
+  height: 24px;
+}
+
+.stop-selector__connector-line {
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(to bottom, #10b981, #6366f1);
+  border-radius: 1px;
+}
+
+/* Price Summary */
+.stop-selector__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.stop-selector__route-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.stop-selector__arrow {
+  color: #94a3b8;
+}
+
+.stop-selector__price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stop-selector__original-price {
+  font-size: 14px;
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.stop-selector__final-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Hint */
+.stop-selector__hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #fef3c7;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #92400e;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .stop-selector {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .stop-selector__title {
+    color: #f1f5f9;
+  }
+
+  .stop-selector__label {
+    color: #94a3b8;
+  }
+
+  .stop-selector__button {
+    background: #0f172a;
+    border-color: #334155;
+  }
+
+  .stop-selector__button:hover {
+    border-color: #6366f1;
+  }
+
+  .stop-selector__city,
+  .stop-selector__option-city,
+  .stop-selector__option-time {
+    color: #f1f5f9;
+  }
+
+  .stop-selector__time,
+  .stop-selector__option-station {
+    color: #94a3b8;
+  }
+
+  .stop-selector__dropdown {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .stop-selector__option {
+    border-color: #334155;
+  }
+
+  .stop-selector__option:hover {
+    background: #334155;
+  }
+
+  .stop-selector__option--selected {
+    background: #1e3a5f;
+  }
+
+  .stop-selector__route-info {
+    color: #cbd5e1;
+  }
+
+  .stop-selector__final-price {
+    color: #f1f5f9;
+  }
+
+  .stop-selector__summary {
+    border-color: #334155;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .stop-selector {
+    padding: 12px;
+  }
+
+  .stop-selector__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .stop-selector__option-station {
+    max-width: 150px;
+  }
+
+  .stop-selector__summary {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .stop-selector__price {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

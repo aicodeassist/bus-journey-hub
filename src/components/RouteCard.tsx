@@ -1,7 +1,9 @@
 import { Clock, MapPin, Bus, Wifi, Snowflake, Plug, Star, Droplets, ChevronDown, ChevronUp, Map } from "lucide-react";
-import { useState, Suspense, lazy } from "react";
+import { useState, Suspense, lazy, useCallback } from "react";
 import RouteTimeline from "./RouteTimeline";
+import StopSelector, { StopSelection } from "./StopSelector";
 import './RouteMap.css';
+import './StopSelector.css';
 
 // Lazy load map component
 const RouteMap = lazy(() => import('./RouteMap'));
@@ -27,7 +29,7 @@ interface RouteCardProps {
   amenities: string[];
   busType: string;
   stops?: RouteStop[];
-  onSelect?: () => void;
+  onSelect?: (adjustedPrice?: number, stopSelection?: StopSelection) => void;
   isSelected?: boolean;
 }
 
@@ -55,6 +57,19 @@ const RouteCard = ({
   isSelected = false,
 }: RouteCardProps) => {
   const [showDetails, setShowDetails] = useState(false);
+  const [stopSelection, setStopSelection] = useState<StopSelection | null>(null);
+
+  const displayPrice = stopSelection?.adjustedPrice ?? price;
+
+  const handleStopSelectionChange = useCallback((selection: StopSelection) => {
+    setStopSelection(selection);
+  }, []);
+
+  const handleSelect = () => {
+    if (onSelect) {
+      onSelect(displayPrice, stopSelection ?? undefined);
+    }
+  };
 
   return (
     <div className={`route-card ${isSelected ? "ring-2 ring-accent bg-accent/5" : ""}`}>
@@ -132,7 +147,14 @@ const RouteCard = ({
         {/* Price & Booking */}
         <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-2 lg:w-48 pt-4 lg:pt-0 border-t lg:border-t-0 lg:border-l border-border lg:pl-6">
           <div className="text-right">
-            <div className="text-3xl font-bold text-foreground">{price} ₴</div>
+            {stopSelection && displayPrice !== price ? (
+              <>
+                <div className="text-sm text-muted-foreground line-through">{price} ₴</div>
+                <div className="text-3xl font-bold text-foreground">{displayPrice} ₴</div>
+              </>
+            ) : (
+              <div className="text-3xl font-bold text-foreground">{price} ₴</div>
+            )}
             <div className="text-sm text-muted-foreground">за місце</div>
           </div>
           <div className="flex flex-col items-end gap-2">
@@ -140,7 +162,7 @@ const RouteCard = ({
               {seatsAvailable < 5 ? `Залишилось ${seatsAvailable} місць` : `${seatsAvailable} місць`}
             </span>
             <button 
-              onClick={onSelect}
+              onClick={handleSelect}
               className={`px-6 py-3 text-sm rounded-xl font-medium transition-all ${
                 isSelected 
                   ? "bg-accent text-accent-foreground" 
@@ -168,6 +190,15 @@ const RouteCard = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left Column: Route & Map */}
             <div className="space-y-6">
+              {/* Stop Selector - only show if there are intermediate stops */}
+              {stops && stops.length > 2 && (
+                <StopSelector 
+                  stops={stops}
+                  basePrice={price}
+                  onSelectionChange={handleStopSelectionChange}
+                />
+              )}
+
               {/* Route Info */}
               <div>
                 <h4 className="font-semibold text-foreground mb-3">Маршрут</h4>
