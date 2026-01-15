@@ -1,6 +1,10 @@
-import { Clock, MapPin, Bus, Wifi, Snowflake, Plug, Star, Droplets, ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { Clock, MapPin, Bus, Wifi, Snowflake, Plug, Star, Droplets, ChevronDown, ChevronUp, Map } from "lucide-react";
+import { useState, Suspense, lazy } from "react";
 import RouteTimeline from "./RouteTimeline";
+import './RouteMap.css';
+
+// Lazy load map component
+const RouteMap = lazy(() => import('./RouteMap'));
 
 interface RouteStop {
   time: string;
@@ -161,67 +165,89 @@ const RouteCard = ({
       {/* Details Panel */}
       {showDetails && (
         <div className="mt-4 pt-4 border-t border-border animate-slide-up">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Route Info */}
-            <div>
-              <h4 className="font-semibold text-foreground mb-3">Маршрут</h4>
-              <RouteTimeline 
-                stops={stops || [
-                  { time: departureTime, city: departureCity, station: `${departureCity}, Центральний автовокзал` },
-                  { time: arrivalTime, city: arrivalCity, station: `${arrivalCity}, Центральний автовокзал` },
-                ]}
-                showIntermediateStops={true}
-              />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column: Route & Map */}
+            <div className="space-y-6">
+              {/* Route Info */}
+              <div>
+                <h4 className="font-semibold text-foreground mb-3">Маршрут</h4>
+                <RouteTimeline 
+                  stops={stops || [
+                    { time: departureTime, city: departureCity, station: `${departureCity}, Центральний автовокзал` },
+                    { time: arrivalTime, city: arrivalCity, station: `${arrivalCity}, Центральний автовокзал` },
+                  ]}
+                  showIntermediateStops={true}
+                />
+              </div>
+
+              {/* Map */}
+              <div>
+                <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Map className="w-4 h-4" />
+                  Карта маршруту
+                </h4>
+                <Suspense fallback={
+                  <div className="w-full h-[300px] bg-secondary rounded-xl flex items-center justify-center text-muted-foreground">
+                    Завантаження карти...
+                  </div>
+                }>
+                  <RouteMap 
+                    stops={stops || [
+                      { time: departureTime, city: departureCity, station: `${departureCity}, Центральний автовокзал` },
+                      { time: arrivalTime, city: arrivalCity, station: `${arrivalCity}, Центральний автовокзал` },
+                    ]}
+                  />
+                </Suspense>
+              </div>
             </div>
 
-            {/* Amenities */}
-            <div>
-              <h4 className="font-semibold text-foreground mb-3">Зручності</h4>
-              <div className="space-y-2">
-                {amenities.map(amenity => (
-                  <div key={amenity} className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-accent">
-                      {amenityIcons[amenity]?.icon}
+            {/* Right Column: Amenities & Carrier */}
+            <div className="space-y-6">
+              {/* Amenities */}
+              <div>
+                <h4 className="font-semibold text-foreground mb-3">Зручності</h4>
+                <div className="space-y-2">
+                  {amenities.map(amenity => (
+                    <div key={amenity} className="flex items-center gap-3 text-sm">
+                      <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-accent">
+                        {amenityIcons[amenity]?.icon}
+                      </div>
+                      <span>{amenityIcons[amenity]?.label || amenity}</span>
                     </div>
-                    <span>{amenityIcons[amenity]?.label || amenity}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Carrier Info */}
-            <div>
-              <h4 className="font-semibold text-foreground mb-3">Перевізник</h4>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Bus className="w-8 h-8 text-primary" />
-                </div>
-                <div>
-                  <p className="font-semibold text-lg">{carrier}</p>
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Star className="w-4 h-4 text-accent fill-accent" />
-                    <span>{carrierRating} / 5.0</span>
-                  </div>
+                  ))}
                 </div>
               </div>
-              <div className="space-y-1 text-sm text-muted-foreground">
-                <p>Тип автобуса: <span className="text-foreground">{busType}</span></p>
-                <p>Клас обслуговування: <span className="text-foreground">Стандарт</span></p>
-              </div>
-            </div>
-          </div>
 
-          {/* Policies */}
-          <div className="mt-6 pt-4 border-t border-border">
-            <h4 className="font-semibold text-foreground mb-3">Умови перевезення</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+              {/* Carrier Info */}
               <div>
-                <p>• Безкоштовне скасування за 24 години до виїзду</p>
-                <p>• 1 місце багажу включено (до 20 кг)</p>
+                <h4 className="font-semibold text-foreground mb-3">Перевізник</h4>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Bus className="w-8 h-8 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-lg">{carrier}</p>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Star className="w-4 h-4 text-accent fill-accent" />
+                      <span>{carrierRating} / 5.0</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-1 text-sm text-muted-foreground">
+                  <p>Тип автобуса: <span className="text-foreground">{busType}</span></p>
+                  <p>Клас обслуговування: <span className="text-foreground">Стандарт</span></p>
+                </div>
               </div>
+
+              {/* Policies */}
               <div>
-                <p>• Ручна поклажа до 5 кг</p>
-                <p>• Посадка за 15 хвилин до відправлення</p>
+                <h4 className="font-semibold text-foreground mb-3">Умови перевезення</h4>
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <p>• Безкоштовне скасування за 24 години до виїзду</p>
+                  <p>• 1 місце багажу включено (до 20 кг)</p>
+                  <p>• Ручна поклажа до 5 кг</p>
+                  <p>• Посадка за 15 хвилин до відправлення</p>
+                </div>
               </div>
             </div>
           </div>
