@@ -4,8 +4,8 @@ import SearchForm from "@/components/SearchForm";
 import RouteCard from "@/components/RouteCard";
 import Footer from "@/components/Footer";
 import { Filter, SortAsc, ChevronDown, X, ArrowRight, ArrowLeft } from "lucide-react";
-import { useState, useMemo } from "react";
-
+import { useState, useMemo, useCallback } from "react";
+import { StopSelection } from "@/components/StopSelector";
 // Generate mock routes based on search parameters
 const generateMockRoutes = (from: string, to: string, isReturn = false) => {
   const baseRoutes = [
@@ -179,6 +179,10 @@ const SearchResults = () => {
   const [activeTab, setActiveTab] = useState<"outbound" | "return">("outbound");
   const [selectedOutbound, setSelectedOutbound] = useState<string | null>(null);
   const [selectedReturn, setSelectedReturn] = useState<string | null>(null);
+  const [outboundStopSelection, setOutboundStopSelection] = useState<StopSelection | null>(null);
+  const [returnStopSelection, setReturnStopSelection] = useState<StopSelection | null>(null);
+  const [outboundPrice, setOutboundPrice] = useState<number | null>(null);
+  const [returnPrice, setReturnPrice] = useState<number | null>(null);
   const [filters, setFilters] = useState<Filters>({
     timeSlots: [],
     priceMin: "",
@@ -212,13 +216,25 @@ const SearchResults = () => {
     day: "numeric",
   }) : "";
 
-  const handleSelectRoute = (routeId: string, type: "outbound" | "return") => {
+  // Generate routes based on search parameters - moved before handlers
+  const outboundRoutes = useMemo(() => generateMockRoutes(from, to, false), [from, to]);
+  const returnRoutes = useMemo(() => generateMockRoutes(to, from, true), [from, to]);
+
+  const handleSelectRoute = useCallback((
+    routeId: string, 
+    type: "outbound" | "return", 
+    adjustedPrice?: number, 
+    stopSelection?: StopSelection
+  ) => {
     if (type === "outbound") {
       setSelectedOutbound(routeId);
+      setOutboundStopSelection(stopSelection || null);
+      setOutboundPrice(adjustedPrice || null);
       if (hasReturnDate) {
         setActiveTab("return");
       } else {
         // Navigate to booking for one-way trip
+        const route = outboundRoutes.find(r => r.id === routeId);
         const params = new URLSearchParams({
           routeId,
           from,
@@ -226,16 +242,43 @@ const SearchResults = () => {
           date,
           adults: adults.toString(),
           children: children.toString(),
+          price: (adjustedPrice || route?.price || 0).toString(),
         });
+        
+        // Add stop selection data
+        if (stopSelection) {
+          params.set("boardingCity", stopSelection.boardingStop.city);
+          params.set("boardingStation", stopSelection.boardingStop.station);
+          params.set("boardingTime", stopSelection.boardingStop.time);
+          params.set("alightingCity", stopSelection.alightingStop.city);
+          params.set("alightingStation", stopSelection.alightingStop.station);
+          params.set("alightingTime", stopSelection.alightingStop.time);
+        } else if (route) {
+          // Use first and last stops as default
+          const firstStop = route.stops[0];
+          const lastStop = route.stops[route.stops.length - 1];
+          params.set("boardingCity", firstStop.city);
+          params.set("boardingStation", firstStop.station);
+          params.set("boardingTime", firstStop.time);
+          params.set("alightingCity", lastStop.city);
+          params.set("alightingStation", lastStop.station);
+          params.set("alightingTime", lastStop.time);
+        }
+        
         navigate(`/booking?${params.toString()}`);
       }
     } else {
       setSelectedReturn(routeId);
+      setReturnStopSelection(stopSelection || null);
+      setReturnPrice(adjustedPrice || null);
     }
-  };
+  }, [hasReturnDate, from, to, date, adults, children, outboundRoutes, navigate]);
 
   const handleConfirmBooking = () => {
     if (selectedOutbound && (selectedReturn || !hasReturnDate)) {
+      const outboundRoute = outboundRoutes.find(r => r.id === selectedOutbound);
+      const returnRoute = returnRoutes.find(r => r.id === selectedReturn);
+      
       const params = new URLSearchParams({
         outboundId: selectedOutbound,
         returnId: selectedReturn || "",
@@ -245,14 +288,51 @@ const SearchResults = () => {
         returnDate,
         adults: adults.toString(),
         children: children.toString(),
+        price: (outboundPrice || outboundRoute?.price || 0).toString(),
+        returnPriceParam: (returnPrice || returnRoute?.price || 0).toString(),
       });
+      
+      // Add outbound stop selection
+      if (outboundStopSelection) {
+        params.set("boardingCity", outboundStopSelection.boardingStop.city);
+        params.set("boardingStation", outboundStopSelection.boardingStop.station);
+        params.set("boardingTime", outboundStopSelection.boardingStop.time);
+        params.set("alightingCity", outboundStopSelection.alightingStop.city);
+        params.set("alightingStation", outboundStopSelection.alightingStop.station);
+        params.set("alightingTime", outboundStopSelection.alightingStop.time);
+      } else if (outboundRoute) {
+        const firstStop = outboundRoute.stops[0];
+        const lastStop = outboundRoute.stops[outboundRoute.stops.length - 1];
+        params.set("boardingCity", firstStop.city);
+        params.set("boardingStation", firstStop.station);
+        params.set("boardingTime", firstStop.time);
+        params.set("alightingCity", lastStop.city);
+        params.set("alightingStation", lastStop.station);
+        params.set("alightingTime", lastStop.time);
+      }
+      
+      // Add return stop selection
+      if (returnStopSelection) {
+        params.set("returnBoardingCity", returnStopSelection.boardingStop.city);
+        params.set("returnBoardingStation", returnStopSelection.boardingStop.station);
+        params.set("returnBoardingTime", returnStopSelection.boardingStop.time);
+        params.set("returnAlightingCity", returnStopSelection.alightingStop.city);
+        params.set("returnAlightingStation", returnStopSelection.alightingStop.station);
+        params.set("returnAlightingTime", returnStopSelection.alightingStop.time);
+      } else if (returnRoute) {
+        const firstStop = returnRoute.stops[0];
+        const lastStop = returnRoute.stops[returnRoute.stops.length - 1];
+        params.set("returnBoardingCity", firstStop.city);
+        params.set("returnBoardingStation", firstStop.station);
+        params.set("returnBoardingTime", firstStop.time);
+        params.set("returnAlightingCity", lastStop.city);
+        params.set("returnAlightingStation", lastStop.station);
+        params.set("returnAlightingTime", lastStop.time);
+      }
+      
       navigate(`/booking?${params.toString()}`);
     }
   };
-
-  // Generate routes based on search parameters
-  const outboundRoutes = useMemo(() => generateMockRoutes(from, to, false), [from, to]);
-  const returnRoutes = useMemo(() => generateMockRoutes(to, from, true), [from, to]);
 
   // Filter logic
   const applyFilters = (routes: Route[]) => {
@@ -605,7 +685,7 @@ const SearchResults = () => {
               >
                 <RouteCard 
                   {...route} 
-                  onSelect={() => handleSelectRoute(route.id, activeTab)}
+                  onSelect={(adjustedPrice, stopSelection) => handleSelectRoute(route.id, activeTab, adjustedPrice, stopSelection)}
                   isSelected={activeTab === "outbound" ? selectedOutbound === route.id : selectedReturn === route.id}
                 />
               </div>
@@ -634,14 +714,24 @@ const SearchResults = () => {
                     <ArrowRight className="w-5 h-5 text-accent" />
                     <div>
                       <p className="text-sm text-muted-foreground">Туди</p>
-                      <p className="font-semibold">{selectedOutboundRoute?.departureTime} • {selectedOutboundRoute?.price} ₴</p>
+                      <p className="font-semibold">{selectedOutboundRoute?.departureTime} • {outboundPrice || selectedOutboundRoute?.price} ₴</p>
+                      {outboundStopSelection && (
+                        <p className="text-xs text-muted-foreground">
+                          {outboundStopSelection.boardingStop.city} → {outboundStopSelection.alightingStop.city}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <ArrowLeft className="w-5 h-5 text-accent" />
                     <div>
                       <p className="text-sm text-muted-foreground">Назад</p>
-                      <p className="font-semibold">{selectedReturnRoute?.departureTime} • {selectedReturnRoute?.price} ₴</p>
+                      <p className="font-semibold">{selectedReturnRoute?.departureTime} • {returnPrice || selectedReturnRoute?.price} ₴</p>
+                      {returnStopSelection && (
+                        <p className="text-xs text-muted-foreground">
+                          {returnStopSelection.boardingStop.city} → {returnStopSelection.alightingStop.city}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -649,7 +739,7 @@ const SearchResults = () => {
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">Загалом</p>
                     <p className="text-2xl font-bold text-accent">
-                      {(selectedOutboundRoute?.price || 0) + (selectedReturnRoute?.price || 0)} ₴
+                      {(outboundPrice || selectedOutboundRoute?.price || 0) + (returnPrice || selectedReturnRoute?.price || 0)} ₴
                     </p>
                   </div>
                   <button 
