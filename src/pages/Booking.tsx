@@ -1,8 +1,10 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Bus, MapPin, Clock, Star, User, Mail, Phone, CreditCard, Shield, ArrowLeft, Navigation, CircleDot } from "lucide-react";
+import { Bus, MapPin, Clock, Star, User, Mail, Phone, CreditCard, Shield, ArrowLeft, Navigation, CircleDot, CheckCircle } from "lucide-react";
 import { useState } from "react";
+import { Booking, saveBooking, generateBookingId } from "@/lib/bookingStorage";
+import { useToast } from "@/hooks/use-toast";
 
 const mockRoute = {
   id: "1",
@@ -17,12 +19,14 @@ const mockRoute = {
   busType: "Комфорт",
 };
 
-const Booking = () => {
+const BookingPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const from = searchParams.get("from") || mockRoute.departureCity;
   const to = searchParams.get("to") || mockRoute.arrivalCity;
   const date = searchParams.get("date") || "";
+  const routeId = searchParams.get("routeId") || "1";
   const adults = parseInt(searchParams.get("adults") || "1");
   const children = parseInt(searchParams.get("children") || "0");
   const totalPassengers = adults + children;
@@ -45,14 +49,54 @@ const Booking = () => {
     email: "",
     phone: "",
   });
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
 
   const ticketPrice = priceFromParams || mockRoute.price;
   const totalPrice = ticketPrice * totalPassengers;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Бронювання успішне! Квиток надіслано на вашу пошту.");
-    navigate("/");
+    setIsSubmitting(true);
+    
+    // Create booking object
+    const booking: Booking = {
+      id: generateBookingId(),
+      routeId,
+      from,
+      to,
+      date,
+      boardingCity,
+      boardingStation,
+      boardingTime,
+      alightingCity,
+      alightingStation,
+      alightingTime,
+      adults,
+      children,
+      ticketPrice,
+      totalPrice,
+      passenger: {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+      },
+      status: 'active',
+      createdAt: new Date().toISOString(),
+    };
+    
+    // Save to localStorage
+    saveBooking(booking);
+    
+    setBookingSuccess(booking.id);
+    setIsSubmitting(false);
+    
+    toast({
+      title: "Бронювання успішне!",
+      description: `Номер бронювання: ${booking.id}`,
+    });
   };
 
   const formattedDate = date ? new Date(date).toLocaleDateString("uk-UA", {
@@ -198,69 +242,103 @@ const Booking = () => {
                 )}
               </div>
 
-              {/* Passenger Info */}
-              <form onSubmit={handleSubmit} className="bg-card rounded-2xl shadow-card p-6">
-                <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                  <User className="w-5 h-5 text-accent" />
-                  Дані пасажира
-                </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">Ім'я</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.firstName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:border-accent"
-                      placeholder="Введіть ім'я"
-                    />
+              {/* Booking Success */}
+              {bookingSuccess ? (
+                <div className="bg-card rounded-2xl shadow-card p-8 text-center">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-accent/20 flex items-center justify-center mb-4">
+                    <CheckCircle className="w-8 h-8 text-accent" />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">Прізвище</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.lastName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:border-accent"
-                      placeholder="Введіть прізвище"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
-                      <Mail className="w-4 h-4 inline mr-1" />Email
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:border-accent"
-                      placeholder="email@example.com"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
-                      <Phone className="w-4 h-4 inline mr-1" />Телефон
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      value={formData.phone}
-                      onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:border-accent"
-                      placeholder="+380"
-                    />
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Бронювання підтверджено!</h2>
+                  <p className="text-muted-foreground mb-4">
+                    Номер вашого бронювання: <span className="font-mono font-semibold text-foreground">{bookingSuccess}</span>
+                  </p>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Деталі бронювання надіслано на {formData.email}
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button
+                      onClick={() => navigate("/my-bookings")}
+                      className="btn-primary flex items-center justify-center gap-2"
+                    >
+                      Мої бронювання
+                    </button>
+                    <button
+                      onClick={() => navigate("/")}
+                      className="btn-secondary flex items-center justify-center gap-2"
+                    >
+                      На головну
+                    </button>
                   </div>
                 </div>
+              ) : (
+                /* Passenger Info */
+                <form onSubmit={handleSubmit} className="bg-card rounded-2xl shadow-card p-6">
+                  <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <User className="w-5 h-5 text-accent" />
+                    Дані пасажира
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-2">Ім'я</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.firstName}
+                        onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:border-accent"
+                        placeholder="Введіть ім'я"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-2">Прізвище</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.lastName}
+                        onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:border-accent"
+                        placeholder="Введіть прізвище"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-2">
+                        <Mail className="w-4 h-4 inline mr-1" />Email
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:border-accent"
+                        placeholder="email@example.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-2">
+                        <Phone className="w-4 h-4 inline mr-1" />Телефон
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        value={formData.phone}
+                        onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:border-accent"
+                        placeholder="+380"
+                      />
+                    </div>
+                  </div>
 
-                <button type="submit" className="btn-primary w-full mt-6 flex items-center justify-center gap-2">
-                  <CreditCard className="w-5 h-5" />
-                  Оплатити {totalPrice} ₴
-                </button>
-              </form>
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="btn-primary w-full mt-6 flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    <CreditCard className="w-5 h-5" />
+                    {isSubmitting ? "Обробка..." : `Оплатити ${totalPrice} ₴`}
+                  </button>
+                </form>
+              )}
             </div>
 
             {/* Order Summary */}
@@ -313,4 +391,4 @@ const Booking = () => {
   );
 };
 
-export default Booking;
+export default BookingPage;
