@@ -1,4 +1,4 @@
-import { Bus, User, Menu, X } from "lucide-react";
+import { Bus, User, Menu, X, Ticket } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -45,6 +45,13 @@ const Header = () => {
             >
               Про нас
             </a>
+            <Link 
+              to="/my-bookings" 
+              className="text-foreground/80 hover:text-foreground font-medium transition-colors flex items-center gap-1"
+            >
+              <Ticket className="w-4 h-4" />
+              Мої квитки
+            </Link>
           </nav>
 
           {/* Actions */}
@@ -96,6 +103,13 @@ const Header = () => {
               >
                 Про нас
               </a>
+              <Link 
+                to="/my-bookings" 
+                className="flex items-center gap-2 px-4 py-3 rounded-xl text-foreground hover:bg-secondary transition-colors font-medium"
+              >
+                <Ticket className="w-5 h-5" />
+                <span>Мої квитки</span>
+              </Link>
               <button className="flex items-center gap-2 px-4 py-3 rounded-xl text-foreground hover:bg-secondary transition-colors font-medium">
                 <User className="w-5 h-5" />
                 <span>Увійти</span>
