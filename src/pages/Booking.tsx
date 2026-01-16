@@ -1,7 +1,7 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Bus, MapPin, Clock, Star, User, Mail, Phone, CreditCard, Shield, ArrowLeft } from "lucide-react";
+import { Bus, MapPin, Clock, Star, User, Mail, Phone, CreditCard, Shield, ArrowLeft, Navigation, CircleDot } from "lucide-react";
 import { useState } from "react";
 
 const mockRoute = {
@@ -26,6 +26,18 @@ const Booking = () => {
   const adults = parseInt(searchParams.get("adults") || "1");
   const children = parseInt(searchParams.get("children") || "0");
   const totalPassengers = adults + children;
+  const priceFromParams = parseInt(searchParams.get("price") || "0");
+  
+  // Get boarding/alighting stop information
+  const boardingCity = searchParams.get("boardingCity") || from;
+  const boardingStation = searchParams.get("boardingStation") || "";
+  const boardingTime = searchParams.get("boardingTime") || mockRoute.departureTime;
+  const alightingCity = searchParams.get("alightingCity") || to;
+  const alightingStation = searchParams.get("alightingStation") || "";
+  const alightingTime = searchParams.get("alightingTime") || mockRoute.arrivalTime;
+
+  // Check if custom stops were selected (different from origin/destination cities)
+  const hasCustomStops = boardingCity !== from || alightingCity !== to;
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -34,7 +46,8 @@ const Booking = () => {
     phone: "",
   });
 
-  const totalPrice = mockRoute.price * totalPassengers;
+  const ticketPrice = priceFromParams || mockRoute.price;
+  const totalPrice = ticketPrice * totalPassengers;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,9 +98,9 @@ const Booking = () => {
                 
                 <div className="flex items-center gap-4 py-4 border-y border-border">
                   <div className="text-center">
-                    <div className="text-xl font-bold">{mockRoute.departureTime}</div>
+                    <div className="text-xl font-bold">{boardingTime}</div>
                     <div className="text-sm text-muted-foreground flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />{from}
+                      <MapPin className="w-3 h-3" />{boardingCity}
                     </div>
                   </div>
                   <div className="flex-1 flex items-center gap-2">
@@ -100,9 +113,9 @@ const Booking = () => {
                     <div className="w-2 h-2 rounded-full bg-primary" />
                   </div>
                   <div className="text-center">
-                    <div className="text-xl font-bold">{mockRoute.arrivalTime}</div>
+                    <div className="text-xl font-bold">{alightingTime}</div>
                     <div className="text-sm text-muted-foreground flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />{to}
+                      <MapPin className="w-3 h-3" />{alightingCity}
                     </div>
                   </div>
                 </div>
@@ -111,6 +124,78 @@ const Booking = () => {
                   <p>{formattedDate}</p>
                   <p>{totalPassengers} {totalPassengers === 1 ? "пасажир" : "пасажири"}</p>
                 </div>
+              </div>
+
+              {/* Stop Details - Show boarding and alighting addresses */}
+              <div className="bg-card rounded-2xl shadow-card p-6">
+                <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                  <Navigation className="w-5 h-5 text-accent" />
+                  Адреси зупинок
+                </h2>
+                
+                <div className="space-y-4">
+                  {/* Boarding Point */}
+                  <div className="flex items-start gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-4 h-4 rounded-full bg-accent flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full bg-accent-foreground" />
+                      </div>
+                      <div className="w-0.5 h-12 bg-border" />
+                    </div>
+                    <div className="flex-1 pb-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-accent/20 text-accent">
+                          Посадка
+                        </span>
+                        <span className="font-bold text-lg">{boardingTime}</span>
+                      </div>
+                      <p className="font-semibold text-foreground">{boardingCity}</p>
+                      {boardingStation && (
+                        <p className="text-sm text-muted-foreground mt-1">{boardingStation}</p>
+                      )}
+                      {hasCustomStops && boardingCity !== from && (
+                        <p className="text-xs text-accent mt-1">
+                          Проміжна зупинка на маршруті {from} → {to}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Alighting Point */}
+                  <div className="flex items-start gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                        <CircleDot className="w-3 h-3 text-primary-foreground" />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/20 text-primary">
+                          Висадка
+                        </span>
+                        <span className="font-bold text-lg">{alightingTime}</span>
+                      </div>
+                      <p className="font-semibold text-foreground">{alightingCity}</p>
+                      {alightingStation && (
+                        <p className="text-sm text-muted-foreground mt-1">{alightingStation}</p>
+                      )}
+                      {hasCustomStops && alightingCity !== to && (
+                        <p className="text-xs text-accent mt-1">
+                          Проміжна зупинка на маршруті {from} → {to}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {hasCustomStops && (
+                  <div className="mt-4 p-3 bg-accent/10 rounded-xl text-sm text-accent flex items-start gap-2">
+                    <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <p>
+                      Ви обрали проміжні зупинки. Переконайтеся, що будете на місці посадки за 15 хвилин до відправлення.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Passenger Info */}
@@ -183,9 +268,23 @@ const Booking = () => {
               <div className="bg-card rounded-2xl shadow-card p-6 sticky top-24">
                 <h2 className="font-semibold text-lg mb-4">Ваше замовлення</h2>
                 
+                {/* Route summary */}
+                <div className="mb-4 pb-4 border-b border-border">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>Маршрут</span>
+                  </div>
+                  <p className="font-semibold">{boardingCity} → {alightingCity}</p>
+                  {(boardingCity !== from || alightingCity !== to) && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      (частина маршруту {from} → {to})
+                    </p>
+                  )}
+                </div>
+                
                 <div className="space-y-3 text-sm border-b border-border pb-4 mb-4">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Квиток ({totalPassengers} × {mockRoute.price} ₴)</span>
+                    <span className="text-muted-foreground">Квиток ({totalPassengers} × {ticketPrice} ₴)</span>
                     <span>{totalPrice} ₴</span>
                   </div>
                   <div className="flex justify-between">
