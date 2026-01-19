@@ -1,0 +1,27 @@
+/* ==========================================================================
+   БусТік Pure CSS Stylesheet
+   Ukrainian Bus Booking Service
+   
+   This file provides pure CSS styles for components being refactored
+   from Tailwind to native CSS. Imports are organized by type.
+   ========================================================================== */
+
+/* ==================== Base Imports ==================== */
+/* Variables/tokens for the new design system */
+@import "./base/variables.css";
+
+/* Typography styles */
+@import "./base/typography.css";
+
+/* Reset (minimal, avoid conflicts with Tailwind) */
+@import "./base/reset.css";
+
+/* ==================== Layout Imports ==================== */
+@import "./layout/container.css";
+
+/* ==================== Component Imports ==================== */
+@import "./components/header.css";
+
+/* ==================== Utility Imports ==================== */
+@import "./utilities/accessibility.css";
+@import "./utilities/animations.css";
