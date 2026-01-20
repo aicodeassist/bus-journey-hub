@@ -1,0 +1,343 @@
+/* ==========================================================================
+   Search Form Component Styles
+   БусТік - Ukrainian Bus Booking Service
+   WCAG 2.2 AA Compliant
+   ========================================================================== */
+
+/* Form container */
+.search-form {
+  background: var(--color-card);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-md);
+}
+
+.search-form--hero {
+  box-shadow: var(--shadow-search);
+  padding: var(--space-md) var(--space-lg);
+}
+
+.search-form--compact {
+  box-shadow: var(--shadow-card);
+}
+
+/* Fieldset reset */
+.search-form__fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+/* Screen reader only legend */
+.search-form__legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Form layout */
+.search-form__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  align-items: stretch;
+}
+
+@media (min-width: 1024px) {
+  .search-form--hero .search-form__content {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 768px) {
+  .search-form--compact .search-form__content {
+    flex-direction: row;
+  }
+}
+
+/* ==================== Cities Group ==================== */
+
+.search-form__cities {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+@media (min-width: 768px) {
+  .search-form__cities {
+    flex-direction: row;
+  }
+}
+
+.search-form--hero .search-form__cities {
+  flex: 2;
+}
+
+.search-form--compact .search-form__cities {
+  flex: 2;
+}
+
+/* Form group */
+.search-form__group {
+  position: relative;
+  flex: 1;
+}
+
+.search-form__label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-muted-foreground);
+  margin-block-end: var(--space-2xs);
+}
+
+.search-form--compact .search-form__label {
+  /* Hide labels in compact mode, but keep for screen readers */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.search-form__input-wrapper {
+  height: 52px;
+}
+
+/* ==================== Swap Button ==================== */
+
+.search-form__swap-btn {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xs);
+  background: var(--color-card);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  transition: 
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+  
+  /* Mobile positioning */
+  top: 52px;
+  right: var(--space-sm);
+  transform: translateY(-50%);
+}
+
+@media (min-width: 768px) {
+  .search-form__swap-btn {
+    top: 50%;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+  }
+  
+  .search-form--hero .search-form__swap-btn {
+    transform: translate(-50%, calc(-50% + 14px));
+  }
+}
+
+.search-form__swap-btn:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-foreground);
+}
+
+.search-form__swap-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.search-form__swap-btn svg {
+  width: 16px;
+  height: 16px;
+  transition: transform var(--transition-base);
+}
+
+.search-form__swap-btn:hover svg {
+  transform: rotate(180deg);
+}
+
+/* ==================== Dates Group ==================== */
+
+.search-form__dates {
+  flex: 1;
+}
+
+.search-form__dates-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 52px;
+  background: hsl(var(--secondary) / 0.5);
+  border-radius: var(--radius-lg);
+  border: 2px solid transparent;
+  transition: 
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.search-form__dates-container:hover {
+  background: var(--color-secondary);
+}
+
+.search-form__dates-container:focus-within {
+  border-color: var(--color-accent);
+  background: var(--color-card);
+}
+
+.search-form__dates-icon {
+  position: absolute;
+  left: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--color-accent);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.search-form__date-field {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-inline: var(--space-sm);
+}
+
+.search-form__date-field:first-of-type {
+  padding-inline-start: calc(var(--space-sm) + 28px);
+}
+
+.search-form__date-label {
+  font-size: 10px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-muted-foreground);
+  line-height: 1;
+}
+
+.search-form__date-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+/* ==================== Passengers ==================== */
+
+.search-form__passengers {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .search-form--hero .search-form__passengers {
+    width: 176px;
+  }
+}
+
+@media (min-width: 768px) {
+  .search-form--compact .search-form__passengers {
+    width: 160px;
+  }
+}
+
+/* ==================== Submit Button ==================== */
+
+.search-form__submit-group {
+  display: flex;
+  align-items: stretch;
+}
+
+@media (min-width: 1024px) {
+  .search-form--hero .search-form__submit-group {
+    align-items: flex-end;
+  }
+}
+
+@media (min-width: 768px) {
+  .search-form--compact .search-form__submit-group {
+    align-items: center;
+  }
+}
+
+.search-form__spacer {
+  display: none;
+  height: 22px;
+}
+
+@media (min-width: 1024px) {
+  .search-form--hero .search-form__spacer {
+    display: block;
+  }
+}
+
+.search-form__submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xs);
+  height: 52px;
+  padding-inline: var(--space-md);
+  background: var(--gradient-accent);
+  color: white;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  white-space: nowrap;
+  width: 100%;
+  transition: 
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+@media (min-width: 1024px) {
+  .search-form--hero .search-form__submit-btn {
+    width: auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .search-form--compact .search-form__submit-btn {
+    width: auto;
+  }
+}
+
+.search-form__submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-accent);
+}
+
+.search-form__submit-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.search-form__submit-btn:active {
+  transform: translateY(0);
+}
+
+.search-form__submit-btn svg {
+  width: 20px;
+  height: 20px;
+}
