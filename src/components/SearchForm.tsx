@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import DatePicker from "./DatePicker";
 import PassengerPicker from "./PassengerPicker";
 import CityPicker from "./CityPicker";
-import "../styles/components/search-form.css";
 
 interface SearchFormProps {
   variant?: "hero" | "compact";
@@ -53,143 +52,141 @@ const SearchForm = ({ variant = "hero", initialData }: SearchFormProps) => {
   };
 
   const isHero = variant === "hero";
-  const formClass = `search-form ${isHero ? "search-form--hero" : "search-form--compact"}`;
 
   return (
     <form 
       onSubmit={handleSubmit}
-      className={formClass}
-      role="search"
-      aria-label="Пошук автобусних квитків"
+      className={`
+        ${isHero 
+          ? "bg-card rounded-3xl shadow-search p-4 md:p-6" 
+          : "bg-card rounded-2xl shadow-card p-4"
+        }
+      `}
     >
-      <fieldset className="search-form__fieldset">
-        <legend className="search-form__legend">
-          Форма пошуку квитків на автобус
-        </legend>
-
-        <div className="search-form__content">
-          {/* Cities Group */}
-          <div className="search-form__cities" role="group" aria-labelledby="cities-group-label">
-            <span id="cities-group-label" className="search-form__legend">
-              Маршрут подорожі
-            </span>
-
-            {/* From Field */}
-            <div className="search-form__group">
-              <label 
-                htmlFor="departure-city" 
-                className="search-form__label"
-              >
+      <div className={`flex flex-col ${isHero ? "lg:flex-row" : "md:flex-row"} gap-3 items-stretch`}>
+        {/* Cities Container with Swap Button */}
+        <div className={`relative flex flex-col md:flex-row gap-3 ${isHero ? "lg:flex-[2]" : "md:flex-[2]"}`}>
+          {/* From Field */}
+          <div className="relative flex-1">
+            {isHero && (
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Звідки
               </label>
-              <div className="search-form__input-wrapper">
-                <CityPicker
-                  value={formData.from}
-                  onChange={(city) => setFormData(prev => ({ ...prev, from: city }))}
-                  placeholder={isHero ? "Місто відправлення" : "Звідки"}
-                  label="Звідки"
-                />
-              </div>
-            </div>
-
-            {/* Swap Button */}
-            <button
-              type="button"
-              onClick={handleSwapCities}
-              className="search-form__swap-btn"
-              aria-label="Поміняти місця відправлення та прибуття"
-            >
-              <ArrowRightLeft aria-hidden="true" />
-            </button>
-
-            {/* To Field */}
-            <div className="search-form__group">
-              <label 
-                htmlFor="arrival-city" 
-                className="search-form__label"
-              >
-                Куди
-              </label>
-              <div className="search-form__input-wrapper">
-                <CityPicker
-                  value={formData.to}
-                  onChange={(city) => setFormData(prev => ({ ...prev, to: city }))}
-                  placeholder={isHero ? "Місто прибуття" : "Куди"}
-                  label="Куди"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Dates Group */}
-          <div className="search-form__dates" role="group" aria-labelledby="dates-group-label">
-            <label 
-              id="dates-group-label" 
-              className="search-form__label"
-            >
-              Дати
-            </label>
-            <div className="search-form__dates-container">
-              <Calendar className="search-form__dates-icon" aria-hidden="true" />
-              
-              {/* Departure Date */}
-              <div className="search-form__date-field">
-                <span className="search-form__date-label" id="departure-date-label">
-                  Туди
-                </span>
-                <DatePicker
-                  value={formData.departureDate}
-                  onChange={(date) => setFormData(prev => ({ ...prev, departureDate: date }))}
-                  placeholder="Виберіть"
-                />
-              </div>
-              
-              {/* Divider */}
-              <div className="search-form__date-divider" aria-hidden="true" />
-              
-              {/* Return Date */}
-              <div className="search-form__date-field">
-                <span className="search-form__date-label" id="return-date-label">
-                  Назад
-                </span>
-                <DatePicker
-                  value={formData.returnDate}
-                  onChange={(date) => setFormData(prev => ({ ...prev, returnDate: date }))}
-                  placeholder="+ Додати"
-                  minDate={formData.departureDate}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Passengers */}
-          <div className="search-form__passengers">
-            <label className="search-form__label" id="passengers-label">
-              Пасажири
-            </label>
-            <div className="search-form__input-wrapper">
-              <PassengerPicker
-                adults={formData.adults}
-                children={formData.children}
-                onChangeAdults={(count) => setFormData(prev => ({ ...prev, adults: count }))}
-                onChangeChildren={(count) => setFormData(prev => ({ ...prev, children: count }))}
+            )}
+            <div className="h-[52px]">
+              <CityPicker
+                value={formData.from}
+                onChange={(city) => setFormData(prev => ({ ...prev, from: city }))}
+                placeholder={isHero ? "Місто відправлення" : "Звідки"}
+                label="Звідки"
               />
             </div>
           </div>
 
-          {/* Search Button */}
-          <div className="search-form__submit-group">
-            <div className="search-form__spacer" aria-hidden="true" />
+          {/* Swap Button - positioned between cities */}
+          <div className={`
+            absolute z-20
+            md:top-1/2 md:left-1/2 md:-translate-x-1/2
+            ${isHero ? "md:translate-y-1" : "md:-translate-y-1/2"}
+            top-[52px] right-4 -translate-y-1/2 md:right-auto
+            ${isHero && "lg:top-[calc(50%+14px)]"}
+          `}>
             <button
-              type="submit"
-              className="search-form__submit-btn"
+              type="button"
+              onClick={handleSwapCities}
+              className="p-2.5 rounded-full bg-card border-2 border-border shadow-soft hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300 group"
             >
-              <Search aria-hidden="true" />
-              <span>{isHero ? "Знайти квитки" : "Знайти"}</span>
+              <ArrowRightLeft className="w-4 h-4 transition-transform group-hover:rotate-180 duration-300" />
             </button>
           </div>
+
+          {/* To Field */}
+          <div className="relative flex-1">
+            {isHero && (
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
+                Куди
+              </label>
+            )}
+            <div className="h-[52px]">
+              <CityPicker
+                value={formData.to}
+                onChange={(city) => setFormData(prev => ({ ...prev, to: city }))}
+                placeholder={isHero ? "Місто прибуття" : "Куди"}
+                label="Куди"
+              />
+            </div>
+          </div>
         </div>
-      </fieldset>
+
+        {/* Combined Date Fields */}
+        <div className={isHero ? "lg:flex-1" : "md:flex-1"}>
+          {isHero && (
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Дати
+            </label>
+          )}
+          <div className="relative flex items-center h-[52px] bg-secondary/50 rounded-xl border-2 border-transparent hover:bg-secondary focus-within:border-accent focus-within:bg-card transition-all duration-300">
+            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent z-10 pointer-events-none" />
+            
+            {/* Departure Date */}
+            <div className="relative flex-1 h-full flex flex-col justify-center pl-12 pr-3">
+              <span className="text-[10px] font-medium text-muted-foreground leading-none">
+                Туди
+              </span>
+              <DatePicker
+                value={formData.departureDate}
+                onChange={(date) => setFormData(prev => ({ ...prev, departureDate: date }))}
+                placeholder="Виберіть"
+              />
+            </div>
+            
+            {/* Divider - centered */}
+            <div className="w-px h-8 bg-border" />
+            
+            {/* Return Date */}
+            <div className="relative flex-1 h-full flex flex-col justify-center pl-3 pr-3">
+              <span className="text-[10px] font-medium text-muted-foreground leading-none">
+                Назад
+              </span>
+              <DatePicker
+                value={formData.returnDate}
+                onChange={(date) => setFormData(prev => ({ ...prev, returnDate: date }))}
+                placeholder="+ Додати"
+                minDate={formData.departureDate}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Passengers */}
+        <div className={isHero ? "lg:w-44" : "md:w-40"}>
+          {isHero && (
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Пасажири
+            </label>
+          )}
+          <div className="h-[52px]">
+            <PassengerPicker
+              adults={formData.adults}
+              children={formData.children}
+              onChangeAdults={(count) => setFormData(prev => ({ ...prev, adults: count }))}
+              onChangeChildren={(count) => setFormData(prev => ({ ...prev, children: count }))}
+            />
+          </div>
+        </div>
+
+        {/* Search Button */}
+        <div className={`flex ${isHero ? "lg:items-end" : "md:items-center"}`}>
+          {isHero && <div className="hidden lg:block h-[22px]" />}
+          <button
+            type="submit"
+            className={`btn-primary h-[52px] px-6 flex items-center justify-center gap-2 whitespace-nowrap ${isHero ? "w-full lg:w-auto" : "w-full md:w-auto"}`}
+          >
+            <Search className="w-5 h-5" />
+            <span>{isHero ? "Знайти квитки" : "Знайти"}</span>
+          </button>
+        </div>
+      </div>
     </form>
   );
 };

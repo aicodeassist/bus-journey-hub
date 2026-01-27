@@ -1,193 +1,124 @@
 import { Bus, User, Menu, X, Ticket } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
-import "../styles/components/header.css";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const location = useLocation();
-
-  // Track scroll state for header styling
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Close menu on route change
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [location.pathname]);
-
-  // Focus trap and escape key for mobile menu
-  useEffect(() => {
-    if (!isMenuOpen) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsMenuOpen(false);
-        menuButtonRef.current?.focus();
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [isMenuOpen]);
-
-  // Check if current route is active
-  const isActive = (path: string) => location.pathname === path;
-
-  const navItems = [
-    { to: "/", label: "Головна", isLink: true },
-    { to: "/search", label: "Пошук рейсів", isLink: true },
-    { href: "#popular", label: "Популярні напрямки", isLink: false },
-    { href: "#about", label: "Про нас", isLink: false },
-  ];
 
   return (
-    <>
-      {/* Skip Link for Accessibility */}
-      <a href="#main-content" className="sr-only-focusable skip-link">
-        Перейти до основного вмісту
-      </a>
-
-      <header 
-        className="site-header" 
-        role="banner"
-        data-scrolled={isScrolled}
-      >
-        <div className="header-container">
-          <div className="header-content">
-            {/* Logo */}
-            <Link to="/" className="header-logo" aria-label="БусТік - На головну">
-              <span className="header-logo__icon" aria-hidden="true">
-                <Bus />
-              </span>
-              <span className="header-logo__text">busbooking</span>
-            </Link>
-
-            {/* Desktop Navigation */}
-            <nav className="header-nav" aria-label="Основна навігація">
-              <ul className="header-nav__list" role="list">
-                {navItems.map((item) => (
-                  <li key={item.label}>
-                    {item.isLink ? (
-                      <Link
-                        to={item.to!}
-                        className="header-nav__link"
-                        aria-current={isActive(item.to!) ? "page" : undefined}
-                      >
-                        {item.label}
-                      </Link>
-                    ) : (
-                      <a href={item.href} className="header-nav__link">
-                        {item.label}
-                      </a>
-                    )}
-                  </li>
-                ))}
-                <li>
-                  <Link
-                    to="/my-bookings"
-                    className="header-nav__link"
-                    aria-current={isActive("/my-bookings") ? "page" : undefined}
-                  >
-                    <Ticket aria-hidden="true" />
-                    <span>Мої квитки</span>
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-
-            {/* Desktop Actions */}
-            <div className="header-actions">
-              <button 
-                type="button"
-                className="header-actions__btn"
-                aria-label="Увійти до особистого кабінету"
-              >
-                <User aria-hidden="true" />
-                <span>Увійти</span>
-              </button>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16 md:h-20">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center transition-transform group-hover:scale-105">
+              <Bus className="w-5 h-5 text-primary-foreground" />
             </div>
+            <span className="font-display font-bold text-xl text-foreground">
+              busbooking
+            </span>
+          </Link>
 
-            {/* Mobile Menu Toggle */}
-            <button
-              ref={menuButtonRef}
-              type="button"
-              className="header-menu-toggle"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-expanded={isMenuOpen}
-              aria-controls="mobile-menu"
-              aria-label={isMenuOpen ? "Закрити меню" : "Відкрити меню"}
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-8">
+            <Link 
+              to="/" 
+              className="text-foreground/80 hover:text-foreground font-medium transition-colors"
             >
-              {isMenuOpen ? (
-                <X aria-hidden="true" />
-              ) : (
-                <Menu aria-hidden="true" />
-              )}
+              Головна
+            </Link>
+            <Link 
+              to="/search" 
+              className="text-foreground/80 hover:text-foreground font-medium transition-colors"
+            >
+              Пошук рейсів
+            </Link>
+            <a 
+              href="#popular" 
+              className="text-foreground/80 hover:text-foreground font-medium transition-colors"
+            >
+              Популярні напрямки
+            </a>
+            <a 
+              href="#about" 
+              className="text-foreground/80 hover:text-foreground font-medium transition-colors"
+            >
+              Про нас
+            </a>
+            <Link 
+              to="/my-bookings" 
+              className="text-foreground/80 hover:text-foreground font-medium transition-colors flex items-center gap-1"
+            >
+              <Ticket className="w-4 h-4" />
+              Мої квитки
+            </Link>
+          </nav>
+
+          {/* Actions */}
+          <div className="hidden md:flex items-center gap-4">
+            <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-foreground hover:bg-secondary transition-colors">
+              <User className="w-5 h-5" />
+              <span className="font-medium">Увійти</span>
             </button>
           </div>
 
-          {/* Mobile Menu */}
-          <div
-            ref={menuRef}
-            id="mobile-menu"
-            className="header-mobile-menu"
-            data-open={isMenuOpen}
-            aria-hidden={!isMenuOpen}
+          {/* Mobile Menu Button */}
+          <button 
+            className="md:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            <nav className="header-mobile-menu__nav" aria-label="Мобільна навігація">
-              {navItems.map((item) => (
-                item.isLink ? (
-                  <Link
-                    key={item.label}
-                    to={item.to!}
-                    className="header-mobile-menu__link"
-                    aria-current={isActive(item.to!) ? "page" : undefined}
-                    tabIndex={isMenuOpen ? 0 : -1}
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    className="header-mobile-menu__link"
-                    tabIndex={isMenuOpen ? 0 : -1}
-                  >
-                    {item.label}
-                  </a>
-                )
-              ))}
-              <Link
-                to="/my-bookings"
-                className="header-mobile-menu__link"
-                aria-current={isActive("/my-bookings") ? "page" : undefined}
-                tabIndex={isMenuOpen ? 0 : -1}
+            {isMenuOpen ? (
+              <X className="w-6 h-6 text-foreground" />
+            ) : (
+              <Menu className="w-6 h-6 text-foreground" />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden py-4 border-t border-border animate-slide-up">
+            <nav className="flex flex-col gap-2">
+              <Link 
+                to="/" 
+                className="px-4 py-3 rounded-xl text-foreground hover:bg-secondary transition-colors font-medium"
               >
-                <Ticket aria-hidden="true" />
+                Головна
+              </Link>
+              <Link 
+                to="/search" 
+                className="px-4 py-3 rounded-xl text-foreground hover:bg-secondary transition-colors font-medium"
+              >
+                Пошук рейсів
+              </Link>
+              <a 
+                href="#popular" 
+                className="px-4 py-3 rounded-xl text-foreground hover:bg-secondary transition-colors font-medium"
+              >
+                Популярні напрямки
+              </a>
+              <a 
+                href="#about" 
+                className="px-4 py-3 rounded-xl text-foreground hover:bg-secondary transition-colors font-medium"
+              >
+                Про нас
+              </a>
+              <Link 
+                to="/my-bookings" 
+                className="flex items-center gap-2 px-4 py-3 rounded-xl text-foreground hover:bg-secondary transition-colors font-medium"
+              >
+                <Ticket className="w-5 h-5" />
                 <span>Мої квитки</span>
               </Link>
-              <button
-                type="button"
-                className="header-mobile-menu__link"
-                tabIndex={isMenuOpen ? 0 : -1}
-              >
-                <User aria-hidden="true" />
+              <button className="flex items-center gap-2 px-4 py-3 rounded-xl text-foreground hover:bg-secondary transition-colors font-medium">
+                <User className="w-5 h-5" />
                 <span>Увійти</span>
               </button>
             </nav>
           </div>
-        </div>
-      </header>
-    </>
+        )}
+      </div>
+    </header>
   );
 };
 
